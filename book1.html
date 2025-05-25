@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Eye of the World - Interactive Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Introduction & Conclusion. Goal: Inform. Viz/Method: Combined into an "Overview" section. Interaction: Static text. Justification: Provides initial context and summary. Library: HTML.
+        - Report Info: Cosmology (Wheel, Power, Ages). Goal: Inform. Viz/Method: Expandable text sections under "World & Lore". Interaction: Click to toggle visibility of sub-sections. Justification: Clear presentation of complex concepts. Library: HTML/JS. Added LLM-powered "Explain More" for deeper insights.
+        - Report Info: Characters (details, relationships). Goal: Inform, Organize. Viz/Method: Interactive character list under "Characters"; clicking a character displays a detailed profile. Interaction: Click to view profile. Justification: Easy lookup and detailed view of characters. Library: HTML/JS. Added LLM-powered "Generate Characteristic Quote" for dynamic character insights.
+        - Report Info: Places (descriptions, significance). Goal: Inform, Organize. Viz/Method: Interactive list of places under "Places"; clicking a place displays details. Interaction: Click to view details. Justification: Structured exploration of the world's geography. Library: HTML/JS.
+        - Report Info: Prophecies (Karaethon Cycle). Goal: Inform. Viz/Method: List of prophecies with explanations under "Prophecies". Interaction: Static text, potentially expandable if very long. Justification: Focused view on key plot drivers. Library: HTML/JS.
+        - Report Info: Character Relationship Table. Goal: Compare, Inform. Viz/Method: Data integrated into individual character profiles, rather than a static table. Interaction: View within character profile. Justification: More dynamic and integrated. Library: HTML/JS.
+        - No quantitative data suitable for Chart.js/Plotly was present in the literary analysis. Focus is on interactive text and structure.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-bottom-width: 4px;
+            border-color: #d97706; /* amber-600 */
+            color: #92400e; /* amber-800 */
+            font-weight: 600;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .clickable-list-item {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .clickable-list-item:hover {
+            background-color: #fef3c7; /* amber-100 */
+        }
+        .details-card {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        /* For better scrollbar styling if needed, though Tailwind doesn't directly support it */
+        .details-card::-webkit-scrollbar {
+            width: 8px;
+        }
+        .details-card::-webkit-scrollbar-track {
+            background: #fde68a; /* amber-200 */
+        }
+        .details-card::-webkit-scrollbar-thumb {
+            background-color: #d97706; /* amber-600 */
+            border-radius: 4px;
+        }
+        .prose h2 { margin-top: 1.5em; margin-bottom: 0.5em; font-size: 1.5em; font-weight: 600; color: #92400e; /* amber-800 */}
+        .prose h3 { margin-top: 1.25em; margin-bottom: 0.4em; font-size: 1.25em; font-weight: 600; color: #a16207; /* amber-700 */}
+        .prose p { margin-bottom: 1em; line-height: 1.6; }
+        .prose ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em; }
+        .prose strong { font-weight: 600; color: #78350f; /* amber-900 */}
+        .section-intro {
+            font-size: 1.1rem;
+            color: #44403c; /* stone-700 */
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #fafaf9; /* stone-50 */
+            border-left: 4px solid #d97706; /* amber-600 */
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800 min-h-screen flex flex-col">
+
+    <header class="bg-amber-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-center">The Eye of the World: An Interactive Exploration</h1>
+        </div>
+        <nav class="bg-amber-50 shadow-md">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-center space-x-2 sm:space-x-4">
+                <button data-tab="overview" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Overview</button>
+                <button data-tab="world" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">World & Lore</button>
+                <button data-tab="characters" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Characters</button>
+                <button data-tab="places" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Places</button>
+                <button data-tab="prophecies" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Prophecies</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+        <div id="overview" class="content-section prose max-w-none">
+            <p class="section-intro">Welcome to this interactive exploration of *The Eye of the World*. This section provides an overview of the novel's significance as the foundational volume of Robert Jordan's epic fantasy series, *The Wheel of Time*. Discover its initial reception, thematic underpinnings, and the grand scope it establishes for the entire saga.</p>
+            <h2>I. Introduction: The Wheel Begins to Turn</h2>
+            <p><em>The Eye of the World</em>, published in 1990, stands as the inaugural volume in Robert Jordan's monumental <em>The Wheel of Time</em> series, a sprawling epic fantasy saga comprising fourteen main novels and two prequels. From its opening pages, the novel establishes itself as a work of grand scope, initially drawing comparisons to foundational fantasy texts such as J.R.R. Tolkien's <em>The Lord of the Rings</em> due to its seemingly idyllic, "Shire-like" starting point and the classic "reluctant farm boy turned savior" archetype. However, Jordan swiftly distinguishes his narrative, not merely by echoing established tropes but by building upon them with a unique cosmology, an intricate magic system, and a thematic focus that diverges from its predecessors. While Tolkien often explored the renunciation of power, Jordan's narrative delves into the complexities of how power must be wielded and its profound consequences.</p>
+            <p>The novel immediately immerses the reader in a world of astonishing detail, introducing a complex magic system, and a vast cast of characters whose interconnected destinies are central to the unfolding saga. It explores timeless oppositions of good versus evil, the transition from innocence to initiation, and the intricate interplay of spiritual powers, both male and female. The narrative, frequently characterized as a "grand quest" and a "coming-of-age story," meticulously sets the stage for a cosmic conflict where "the World and Time themselves hang in the balance," hinting at stakes far beyond the immediate perils faced by its young protagonists.</p>
+
+            <h2>VI. Conclusion (from Report)</h2>
+            <p><em>The Eye of the World</em> serves as an expertly crafted foundation for Robert Jordan's <em>The Wheel of Time</em>, introducing readers to a world of profound depth, intricate lore, and compelling characters. The narrative meticulously establishes a unique cosmology centered on the cyclical <strong>Wheel of Time</strong> and its <strong>Pattern</strong>, a concept that permeates not just destiny but also the very geography and recurring behaviors within the world. This pervasive design elevates the setting from a mere backdrop to an active, symbolic participant in the unfolding saga, demonstrating Jordan's meticulous and layered world-building.</p>
+            <p>The novel's strength lies in its ability to introduce a vast array of characters, each a distinct thread in the Pattern, whose individual journeys and relationships are intricately woven together. From the reluctant farm boys of Emond's Field—Rand, Mat, and Perrin—to the enigmatic Aes Sedai Moiraine and her stoic Warder Lan, their initial innocence is swiftly challenged by the encroaching Shadow. The complexity of character motivations is particularly notable, extending even to the adversaries; Darkfriends, for instance, are depicted with nuanced reasons for their allegiance, ranging from a desire for social mobility to a desperate search for protection, rather than simple malice. This approach adds a layer of realism and moral ambiguity to the conflict, making the threat more insidious and relatable.</p>
+            <p>The introduction of the One Power, its tainted male half, and the cataclysmic history of the Age of Legends and the Breaking of the World provide a rich, tragic backstory that informs the present conflict. The Eye of the World itself is revealed not merely as a climactic battleground but as a transformative catalyst for Rand, imbuing him with a unique perception of the tainted Power and awakening latent connections to his past. This experience fundamentally shapes his internal struggle and his path as the Dragon Reborn.</p>
+            <p>Ultimately, <em>The Eye of the World</em> is more than just an introductory fantasy novel; it is a masterclass in world-building and character development that sets the stage for a sprawling, epic saga. By weaving together profound cosmological concepts, complex character dynamics, and a meticulously detailed world, Jordan invites readers into a narrative where destiny and free will intertwine, and where the echoes of ancient conflicts resonate deeply in the present. Its enduring appeal lies in its ability to immerse readers in a world that feels both vast and intimately personal, promising a journey of immense scope and profound discovery.</p>
+        </div>
+
+        <div id="world" class="content-section prose max-w-none">
+            <p class="section-intro">Delve into the intricate cosmology and lore that form the bedrock of *The Wheel of Time*. This section explains fundamental concepts such as the Wheel of Time itself, the Pattern it weaves, the eternal struggle between the Creator and the Dark One, the nature of the One Power, and the cataclysmic history of the Age of Legends and the Breaking of the World. Understanding these elements is key to appreciating the depth of Jordan's creation.</p>
+            <h2>II. The World Woven: Cosmology and Lore</h2>
+            <div class="mb-6">
+                <h3>The Wheel of Time and the Pattern</h3>
+                <p>At the heart of Jordan's cosmology lies the <strong>Wheel of Time</strong>, a metaphysical entity that endlessly turns, weaving the <strong>Pattern of the Ages</strong>. This Pattern is depicted as a multi-dimensional tapestry, meticulously crafted from the lives of men and women, whose individual destinies serve as its threads, shaping both the physical world and the course of history. The Wheel's will is presented as an absolute force, encapsulated in the recurring maxim: "The Wheel weaves as the Wheel wills". Despite this inherent determinism, the full design of the Pattern remains inscrutable until it has fully manifested, suggesting a delicate interplay between destiny and individual choice. Individuals around whom the Pattern particularly weaves, influencing events and destinies to an extraordinary degree, are known as <em>ta'veren</em>.</p>
+                <p>The pervasive nature of the Pattern extends beyond mere philosophical concept or character destiny; it is a fundamental structural principle embedded within the very fabric of the narrative and world-building. Jordan intricately weaves layers of patterns not only into the unfolding fates of his characters but also into the geography and even the recurring behaviors observed throughout the world. For instance, the seemingly straightforward landscape of the Two Rivers, the protagonists' homeland, is revealed to be a symbolic microcosm of the larger cosmic forces at play. Its rivers, roads, and even the layout of Emond's Field are allegories for the Wheel, the True Source, and the eternal conflict between Light and Shadow. This means the setting is not merely a passive backdrop but an active, symbolic participant in the narrative's thematic structure, subtly guiding events and destinies long before the main characters are consciously aware of their roles. This meticulous design elevates the world-building, transforming it from a simple descriptive exercise into a profound commentary on interconnectedness and fate, inviting readers to uncover deeper meanings with each re-engagement with the text.</p>
+                <button class="llm-lore-button bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-full mt-2 text-sm shadow-md" data-concept="The Wheel of Time and the Pattern">✨ Explain More</button>
+                <div class="llm-lore-output mt-4 p-3 bg-amber-50 rounded-lg shadow-inner text-stone-700 text-sm italic hidden"></div>
+            </div>
+
+            <div class="mb-6">
+                <h3>The Creator and the Dark One (Shai'tan)</h3>
+                <p>The foundational dichotomy of the world is established between the <strong>Creator</strong> and <strong>Shai'tan</strong>, the latter being the source of all evil, commonly referred to as <strong>The Dark One</strong> or <strong>Great Lord of the Dark</strong>. At the moment of Creation itself, the Creator sealed Shai'tan within a prison at <strong>Shayol Ghul</strong> to prevent his malevolent influence from corrupting the nascent world. The Dark One's ultimate ambition is to escape this ancient confinement, dismantle the Creator's work, break the Wheel of Time, end all temporal existence, and utterly destroy the Pattern, remaking reality in his own image. He stands as the absolute antithesis of the Creator, representing chaos and destruction against creation and order.</p>
+                <button class="llm-lore-button bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-full mt-2 text-sm shadow-md" data-concept="The Creator and the Dark One (Shai'tan)">✨ Explain More</button>
+                <div class="llm-lore-output mt-4 p-3 bg-amber-50 rounded-lg shadow-inner text-stone-700 text-sm italic hidden"></div>
+            </div>
+
+            <div class="mb-6">
+                <h3>The One Power</h3>
+                <p>Central to the world's functioning and its magic system is the <strong>One Power</strong>, described as the very force that drives the Wheel of Time and the "driving force of creation" itself. This immense power originates from the <strong>True Source</strong>, which is inherently divided into two distinct halves: <em>saidin</em>, the male half, and <em>saidar</em>, the female half. The ability to access and wield the One Power, drawing flows from the five elements of Earth, Water, Air, Fire, and Spirit, is known as <strong>channeling</strong>.</p>
+                <p>A tragic and defining characteristic of the current age is the taint upon <em>saidin</em>. Approximately 3,500 years prior to the events of <em>The Eye of the World</em>, the Dark One corrupted <em>saidin</em>, ensuring that any man who channels it will inevitably succumb to madness and eventually die. This pervasive taint is a central element of the world's current state, profoundly impacting its history and the lives of its male channelers. Consequently, only women can channel safely in the present age. From the Age of Legends, powerful artifacts exist that interact with the One Power: <em>angreal</em> amplify the amount of Power a channeler can draw, <em>sa'angreal</em> are the most potent of these amplifiers, and <em>ter'angreal</em> are limited to specific, often unique, functions.</p>
+                <button class="llm-lore-button bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-full mt-2 text-sm shadow-md" data-concept="The One Power">✨ Explain More</button>
+                <div class="llm-lore-output mt-4 p-3 bg-amber-50 rounded-lg shadow-inner text-stone-700 text-sm italic hidden"></div>
+            </div>
+
+            <div class="mb-6">
+                <h3>The Age of Legends and the Breaking of the World</h3>
+                <p>The world's distant past is dominated by the <strong>Age of Legends</strong>, also known as the Second Age. This era is depicted as a utopian society, a period of unparalleled prosperity, profound peace, and highly advanced technology, where magic, science, and civic duty were seamlessly intertwined. During this golden age, the <strong>Aes Sedai</strong>, whose name in the Old Tongue means "servants of all," governed wisely from the Hall of Servants, dedicating themselves to finding and training individuals capable of channeling both <em>saidin</em> and <em>saidar</em>, which were then untainted. Citizens enjoyed significantly extended lifespans, with average life expectancy between 150 and 200 years, and some Aes Sedai living over 700 years. Society valued status and honor through dedicated service to the community, and technological marvels like "view-walls" brought perfect semblances of the natural world into buildings.</p>
+                <p>Despite its apparent perfection, the Age of Legends harbored subtle, internal flaws that, while not directly causing its demise, contributed to its vulnerability. Historical accounts suggest that "problems were magnified through inattention, and war might have become inevitable if the Bore hadn't ever been made". Even <strong>Lews Therin Telamon</strong>, the revered Dragon of that age, succumbed to a degree of "pride," believing that "men could match the Creator". This suggests that the Age of Legends, for all its advancements, was not immune to fundamental human frailties, particularly hubris and a potential complacency born of prolonged peace. These internal weaknesses may have subtly predisposed the society to the catastrophic events that followed, adding a layer of tragic complexity to its downfall.</p>
+                <p>This utopian era ended catastrophically with the <strong>Breaking of the World</strong>. During the Age of Legends, a significant misstep occurred when a "bore" was drilled into the Dark One's prison at Shayol Ghul, inadvertently allowing his malevolent influence to touch the world. This act initiated the <strong>War of Power</strong> (also known as the War of the Shadow), a devastating global conflict during which the Dark One actively recruited followers, including the powerful former Aes Sedai who became known as the <strong>Forsaken</strong>. Lews Therin Telamon, the most powerful channeler of his time, led the forces of Light against the Shadow. After a monumental effort to reseal the Dark One's prison, a terrible consequence manifested: the male half of the One Power, <em>saidin</em>, was tainted by the Dark One's touch. This taint drove all male channelers, including Lews Therin himself, to madness. In his final, mad act, Lews Therin killed his entire family, including his wife Ilyena Therin Moerelle, and then unleashed catastrophic power upon himself, geographically reshaping the world and creating mountains like Dragonmount. This prolonged period of male channeler madness and world-shattering destruction is collectively known as the Breaking of the World.</p>
+                <button class="llm-lore-button bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-full mt-2 text-sm shadow-md" data-concept="The Age of Legends and the Breaking of the World">✨ Explain More</button>
+                <div class="llm-lore-output mt-4 p-3 bg-amber-50 rounded-lg shadow-inner text-stone-700 text-sm italic hidden"></div>
+            </div>
+        </div>
+
+        <div id="characters" class="content-section">
+            <p class="section-intro">Meet the diverse cast of characters whose lives are irrevocably changed by the events of *The Eye of the World*. This section allows you to explore individual character profiles, learning about their backgrounds, key traits, significant abilities, and their crucial relationships. Click on a character's name from the list to view their detailed information.</p>
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/3 bg-white p-4 rounded-lg shadow max-h-[80vh] overflow-y-auto">
+                    <h2 class="text-xl font-semibold text-amber-800 mb-3">Character List</h2>
+                    <ul id="characterList" class="space-y-1"></ul>
+                </div>
+                <div id="characterDetails" class="md:w-2/3 bg-white p-6 rounded-lg shadow details-card prose max-w-none">
+                    <p class="text-stone-600">Select a character from the list to see their details.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="places" class="content-section">
+             <p class="section-intro">Journey through the significant locations featured in *The Eye of the World*. From the idyllic Two Rivers to the perilous Great Blight and the mysterious Eye of the World itself, each place plays a vital role in the unfolding narrative. Click on a location from the list to learn about its geography, history, and importance to the story.</p>
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/3 bg-white p-4 rounded-lg shadow max-h-[80vh] overflow-y-auto">
+                    <h2 class="text-xl font-semibold text-amber-800 mb-3">Locations List</h2>
+                    <ul id="placeList" class="space-y-1"></ul>
+                </div>
+                <div id="placeDetails" class="md:w-2/3 bg-white p-6 rounded-lg shadow details-card prose max-w-none">
+                    <p class="text-stone-600">Select a place from the list to see its details.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="prophecies" class="content-section prose max-w-none">
+            <p class="section-intro">Explore the ancient and pivotal Prophecies of the Dragon, known as the Karaethon Cycle. These foretellings shape the destiny of the world and its inhabitants, particularly the Dragon Reborn. This section outlines key prophecies introduced in *The Eye of the World* and their implications for the unfolding saga.</p>
+            <h2>The Karaethon Cycle (Prophecies of the Dragon)</h2>
+            <p>The world of <em>The Wheel of Time</em> is profoundly shaped by prophecy, particularly the extensive collection known as the <strong>Karaethon Cycle</strong>, or the Prophecies of the Dragon. These ancient foretellings speak of the <strong>Dragon Reborn</strong>, the reincarnation of Lews Therin Telamon, who is destined to confront the Shadow at the Last Battle, <strong>Tarmon Gai'don</strong>.</p>
+            <p>Key prophecies introduced or alluded to within <em>The Eye of the World</em> include:</p>
+            <ul>
+                <li>The Dragon Reborn is prophesied to bring a "new Breaking to the world". This "Breaking" is understood not as a literal physical cataclysm like the original Breaking, but rather as a figurative shattering of old nations and alliances, leading to the formation of new political and social structures. This distinction highlights how the Dark One's influence has evolved, now seeking to corrupt and divide human society from within, rather than just causing overt destruction. It implies that the "Breaking" is an ongoing process of societal upheaval, with the Dragon Reborn at its turbulent center.</li>
+                <li>The <strong>Stone of Tear</strong> is prophesied to never fall until the <strong>People of the Dragon</strong> (later revealed to be the Aiel) come to the Stone, and until the <strong>Sword That Cannot Be Touched</strong> (<em>Callandor</em>) is wielded by the Dragon's hand.</li>
+                <li>The Dragon will be reborn on the slopes of <strong>Dragonmount</strong>, born "of a maiden wedded to no man" and "raised by the old blood". This prophecy directly relates to the revelation of Rand's origins.</li>
+                <li>The Dragon Reborn will "face the Shadow and bring forth Light again in the world" at Tarmon Gai'don, yet his coming will also bring "wailing and gnashing of teeth," indicating immense suffering alongside salvation. These prophecies underscore the immense burden and often tragic nature of the Dragon Reborn's destiny, as his arrival heralds both hope and widespread devastation.</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer class="bg-amber-800 text-amber-100 text-center p-4 mt-auto">
+        <p>&copy; 2024 Interactive Literary Analysis. Content based on "The Eye of the World: A Comprehensive Literary Analysis".</p>
+    </footer>
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        const charactersData = [
+            {
+                name: "Rand al'Thor",
+                shortDesc: "Sheepherder, protagonist, prophesied Dragon Reborn",
+                details: `
+                    <p>The primary protagonist, Rand is initially introduced as a tall, gangly sheep herder with distinctive reddish hair and blue-grey eyes, setting him apart from most of the Two Rivers folk. His world is shattered when his adopted father, Tam al'Thor, reveals in a feverish delirium that he found Rand as a baby on a mountainside, hinting at a mysterious origin. Moiraine Damodred identifies Rand as one of three young men from the village who could be the prophesied Dragon Reborn, and he is confirmed to be <em>ta'veren</em>, an individual around whom the Pattern weaves. Rand is initially skeptical and deeply resistant to this daunting destiny, yearning for his simple life.</p>
+                    <p>However, at the climax at the Eye of the World, he unconsciously channels the One Power to heal his horse, Bela, and later consciously draws upon pure <em>saidin</em> to defeat the Forsaken Aginor and strike a blow against Ba'alzamon, unequivocally confirming his identity as the Dragon Reborn. This profound experience leaves him with a unique and unsettling awareness of the taint on <em>saidin</em>, fostering a deep revulsion towards channeling it. He also begins to experience fragmented visions and memories, suggesting a connection to past lives, a nascent ability that will evolve throughout his journey.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Mat & Perrin (childhood friends, fellow <code>ta'veren</code>)</li>
+                        <li>Egwene (romantic interest)</li>
+                        <li>Tam al'Thor (adopted father)</li>
+                        <li>Moiraine (guide, mentor)</li>
+                        <li>Dark One/Forsaken (fated adversary)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li><code>ta'veren</code></li>
+                        <li>Can channel <code>saidin</code> (initially unconsciously, then consciously)</li>
+                        <li>Gains unique awareness of <code>saidin</code>'s taint</li>
+                        <li>Potential for past-life memories</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Matrim 'Mat' Cauthon",
+                shortDesc: "Mischievous farm boy, ta'veren",
+                details: `
+                    <p>A mischievous farm boy from Emond's Field, Mat is known for his prankster nature, his quick wit, and a reputation for being untrustworthy, though fiercely loyal to his friends. Like Rand and Perrin, he is identified as a potential Dragon Reborn candidate and a <em>ta'veren</em>. During their desperate flight, Mat secretly takes a ruby-hilted dagger from the cursed city of Shadar Logoth. This dagger, imbued with the malevolent essence of the city, slowly begins to poison his mind and body, inducing increasing paranoia, suspicion, and a growing hostility even towards his closest companions. This internal corruption and the physical debilitation it causes become a significant and distressing subplot, highlighting the insidious dangers of the Shadow's influence beyond direct physical confrontation. His <em>ta'veren</em> nature is hinted to manifest as extraordinary luck, though this is not fully explored in the first book.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand & Perrin (childhood friends, fellow <code>ta'veren</code>)</li>
+                        <li>Moiraine (guide)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li><code>ta'veren</code></li>
+                        <li>Becomes corrupted by ruby dagger from Shadar Logoth (paranoia, hostility)</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Perrin Aybara",
+                shortDesc: "Blacksmith, woodworker, ta'veren",
+                details: `
+                    <p>A quiet and thoughtful blacksmith and woodworker from Emond's Field, Perrin is characterized by his immense physical strength and deliberate nature. He is the third of the young men identified as a potential Dragon Reborn candidate and a <em>ta'veren</em>. After becoming separated from the main group, he encounters Elyas Machera, who reveals to Perrin his latent abilities as a <strong>wolfbrother</strong>. This unique connection grants him telepathic communication with wolves, heightened senses, increased strength, and causes his eyes to take on a distinctive golden, wolf-like glow. His newfound abilities and connection to the wild lead the fanatical <strong>Children of the Light</strong> to mistakenly believe he is a Darkfriend, resulting in dangerous confrontations.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand & Mat (childhood friends, fellow <code>ta'veren</code>)</li>
+                        <li>Egwene (traveling companion)</li>
+                        <li>Elyas Machera (mentor)</li>
+                        <li>Wolves (telepathic bond)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li><code>ta'veren</code></li>
+                        <li><strong>Wolfbrother</strong> (telepathic communication with wolves, heightened senses, strength, golden eyes)</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Egwene al'Vere",
+                shortDesc: "Mayor's daughter, aspiring channeler",
+                details: `
+                    <p>The ambitious and spirited daughter of Emond's Field's mayor, Egwene is initially romantically involved with Rand. Moiraine quickly recognizes her strong innate potential to channel the One Power, a revelation that thrills Egwene. Eager for adventure and a life beyond the confines of the Two Rivers, she readily embraces the opportunity to join the group, displaying a determined and sometimes "know-it-all" attitude that occasionally puts her at odds with her companions.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand (romantic interest)</li>
+                        <li>Nynaeve (mentor/apprentice relationship)</li>
+                        <li>Moiraine (guide, mentor)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Strong potential to channel the One Power (<code>saidar</code>)</li>
+                        <li>Ambitious, eager for adventure</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Nynaeve al'Meara",
+                shortDesc: "Village Wisdom (healer)",
+                details: `
+                    <p>The formidable <strong>Wisdom</strong> (healer) of Emond's Field, Nynaeve is characterized by her fierce temper, stubbornness, and deep sense of responsibility towards her community. After the devastating Trolloc attack, she tracks her friends with impressive skill, even managing to follow a Warder, and eventually joins their perilous journey. Along the way, she discovers her own powerful, though often frustratingly temperamental, ability to channel the One Power, marking her as a significant force for the Light. She is also a highly skilled herbalist and healer, utilizing traditional remedies alongside her burgeoning channeling abilities.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Emond's Fielders (protector)</li>
+                        <li>Moiraine (reluctant ally)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Powerful innate ability to channel the One Power (<code>saidar</code>)</li>
+                        <li>Skilled herbalist and tracker</li>
+                        <li>Strong temper, stubborn</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Moiraine Damodred",
+                shortDesc: "Aes Sedai of the Blue Ajah",
+                details: `
+                    <p>An enigmatic and powerful <strong>Aes Sedai</strong> of the Blue Ajah, Moiraine arrives in Emond's Field just before the Trolloc attack, her presence signaling the end of the village's long peace. Her singular quest is to find the one prophesied to stand against the Dark One, and she quickly discerns that one of the three young men from Emond's Field is the Dragon Reborn. Moiraine assumes the role of the group's primary guide and protector, utilizing her extensive knowledge of the world, its lore, and her formidable channeling abilities to navigate the myriad dangers they face. Her methods are often characterized by secrecy and a pragmatic ruthlessness, a demeanor that can be unsettling to the naive villagers. This perceived harshness is not arbitrary; it stems from two decades of relentless searching for the Dragon Reborn, a quest during which she could not afford a single mistake, understanding that the fate of the world hangs in the balance. Her willingness to threaten the boys, stating she would kill them "before letting them fall to the Shadow," underscores the immense stakes she operates under and her unwavering commitment to the greater good, even at the cost of individual comfort or trust. This approach, while difficult for the young protagonists to comprehend, is born of a desperate, long-term dedication to saving the world, highlighting the heavy moral compromises required in the face of apocalyptic threats.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Lan (Warder, magically bonded companion)</li>
+                        <li>Emond's Fielders (guide, protector)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Wields the One Power (<code>saidar</code>)</li>
+                        <li>Seeker of the Dragon Reborn</li>
+                        <li>Knowledgeable, pragmatic, secretive</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Lan Mandragoran",
+                shortDesc: "Moiraine's Warder",
+                details: `
+                    <p>Moiraine Damodred's fiercely loyal and highly skilled <strong>Warder</strong>, bound to her by a magical oath that grants him enhanced physical abilities, including stamina and strength, and creates a deep emotional and telepathic link between them. This bond is portrayed as profound and enduring, allowing them to sense each other's physical location and emotional state, a testament to their deep connection. Lan is renowned as a master swordsman, widely considered the greatest of the Third Age, and is secretly the uncrowned King of the fallen Borderland nation of Malkier, a kingdom consumed by the Blight. His stoic demeanor, unwavering resolve, and exceptional combat skills make him an invaluable guardian and protector of the young group.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Moiraine (magically bonded companion)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Master swordsman</li>
+                        <li>Enhanced stamina and strength</li>
+                        <li>Uncrowned King of Malkier</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Thom Merrilin",
+                shortDesc: "Traveling Gleeman",
+                details: `
+                    <p>A charismatic and enigmatic traveling <strong>gleeman</strong> (entertainer) who joins the group early in their journey. Thom is highly intelligent, exceptionally well-educated in history, politics, and ancient lore, and possesses a sharp wit and a sarcastic sense of humor. He aids Rand and Mat in their desperate escape from a Myrddraal in Whitebridge, bravely sacrificing himself to allow them to flee, and is presumed dead, leaving a lasting impact on the boys. Prior to his life as a gleeman, he served as a bard to Queen Morgase of Andor and was known for his acumen in political intrigue, earning him the nickname "Gray Fox".</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand & Mat (temporary companion, mentor)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Highly intelligent, well-educated in lore/politics</li>
+                        <li>Skilled musician/storyteller</li>
+                        <li>Presumed to sacrifice himself for Rand and Mat</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Loial",
+                shortDesc: "Ogier",
+                details: `
+                    <p>A gentle, immensely tall, and hirsute humanoid known as an <strong>Ogier</strong>, whom Rand befriends in Caemlyn. Ogier are renowned for their profound love of history, genealogy, and their exceptional skills in woodwork and masonry. They possess a unique ability called <strong>treesinging</strong>, which allows them to stimulate the growth and healing of plants, and they reside in peaceful sanctuaries known as <strong>steddings</strong>, where the One Power is inaccessible. Loial's extensive knowledge of the <strong>Ways</strong>, ancient Ogier-created shortcuts, becomes crucial for the group's desperate journey towards the Eye of the World.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand (friend)</li>
+                        <li>Moiraine (ally)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Hirsute, tall humanoid</li>
+                        <li>Love of history/genealogy</li>
+                        <li>Skilled in woodwork/masonry</li>
+                        <li>Knowledge of the Ways</li>
+                        <li>Treesinging</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Padan Fain",
+                shortDesc: "Traveling Merchant, Darkfriend",
+                details: `
+                    <p>Initially appearing as an innocuous traveling merchant, Padan Fain is secretly a <strong>Darkfriend</strong>, a human servant of the Dark One. He plays a pivotal, sinister role by leading the Trollocs to Emond's Field, having been granted otherworldly tracking abilities by the Forsaken Ba'alzamon to find the Dragon Reborn candidates. His soul is deeply touched by the Dark One, which later prevents the malevolent spirit of <strong>Mordeth</strong> from completely subsuming him when he enters Shadar Logoth, leading to a horrifying and unique merging of their two evils. Fain embodies the insidious nature of human evil within the Shadow, driven by a twisted blend of the Dark One's will and Mordeth's ancient malevolence.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Dark One (servant)</li>
+                        <li>Mordeth (merged entity)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Secret Darkfriend</li>
+                        <li>Given otherworldly tracking abilities</li>
+                        <li>Becomes merged with Mordeth's evil</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Ba'alzamon (Ishamael)",
+                shortDesc: "Dark One's primary agent, Forsaken",
+                details: `
+                    <p>The ultimate antagonist of the series, the source of all evil, the Dark One makes his presence felt through terrifying, vivid nightmares that torment Rand. In these dreams, he appears to Rand as Ba'alzamon, attempting to tempt him to join the Shadow or threatening him with destruction if he refuses. Ba'alzamon is later revealed to be the Forsaken <strong>Ishamael</strong> in disguise, one of the Dark One's most powerful and devoted servants.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand (primary target, fated adversary)</li>
+                        <li>Dark One (servant)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Appears in dreams to tempt/threaten Rand</li>
+                        <li>Powerful channeler (Forsaken)</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Aginor",
+                shortDesc: "Forsaken",
+                details: `
+                    <p>One of the powerful ancient wielders of the One Power, once prominent Aes Sedai from the Age of Legends who swore allegiance to the Shadow and were imprisoned since the Breaking of the World. Aginor appears at the Eye of the World, having escaped his prison, attempting to claim the Eye's immense power for the Dark One. He is known for creating the Trollocs. Aginor is destroyed by Rand, who draws an overwhelming amount of power from the Eye.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Dark One (servant)</li>
+                        <li>Balthamel (fellow Forsaken)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Ancient wielder of One Power</li>
+                        <li>Created Trollocs</li>
+                        <li>Attempts to claim the Eye of the World</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Balthamel",
+                shortDesc: "Forsaken",
+                details: `
+                    <p>Another of the Forsaken who appears with Aginor at the Eye of the World, having escaped imprisonment. Balthamel also attempts to claim the Eye's power. He is ultimately killed by the Green Man.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Dark One (servant)</li>
+                        <li>Aginor (fellow Forsaken)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Ancient wielder of One Power</li>
+                        <li>Attempts to claim the Eye of the World</li>
+                    </ul>
+                `
+            },
+             {
+                name: "Elyas Machera",
+                shortDesc: "Tracker, Wolfbrother",
+                details: `
+                    <p>A grizzled tracker and fellow <strong>wolfbrother</strong> who encounters Perrin and Egwene after their separation from the main group. He serves as a crucial mentor for Perrin, helping him understand and begin to control his newly discovered ability to communicate telepathically with wolves.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Perrin (mentor)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Can communicate telepathically with wolves</li>
+                        <li>Wolfbrother</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Min Farshaw",
+                shortDesc: "Young woman with viewing ability",
+                details: `
+                    <p>A young woman Rand meets in Baerlon who possesses a unique ability to see "auras" or "viewings" around people, which are glimpses of their future or destiny. Her cryptic prophecies add a layer of foreshadowing and a sense of an unfolding Pattern to the narrative.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Rand (brief encounter, subject of viewings)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Sees "viewings" or "auras" around people, glimpses of their future</li>
+                    </ul>
+                `
+            },
+            {
+                name: "The Green Man (Someshta)",
+                shortDesc: "Guardian of the Eye of the World",
+                details: `
+                    <p>The ancient and singular guardian of the Eye of the World, a unique nature spirit composed entirely of plants and vegetables, and the last surviving member of the Nym, an ancient race. He welcomes the group to the Eye and sacrifices himself in a desperate battle to kill the Forsaken Balthamel, ensuring the Eye's protection.</p>
+                    <h3>Key Relationships:</h3>
+                    <ul>
+                        <li>Aginor & Balthamel (adversaries)</li>
+                    </ul>
+                    <h3>Significant Abilities/Traits:</h3>
+                    <ul>
+                        <li>Ancient nature spirit, last of the Nym</li>
+                        <li>Protects the Eye of the World</li>
+                        <li>Sacrifices himself</li>
+                    </ul>
+                `
+            },
+            {
+                name: "Trollocs",
+                shortDesc: "Foot soldiers of the Shadow",
+                details: `
+                    <p>The primary foot soldiers of the Shadow, Trollocs are monstrous, approximately eight-foot-tall humanoids with the bodies of men and the heads and feet of various animals such as bears, birds, wolves, or goats. They were created by the Forsaken Aginor during the Shadow War using both the True Power and the One Power. While strong and fast, they are depicted as stupid, lazy, and cowardly, primarily driven by a desire to kill for pleasure. They are organized into tribe-like bands, each with its own sigil, and their weapons, forged in Thakan'dar near Shayol Ghul, can cause festering, deadly wounds. They reproduce, occasionally giving birth to Myrddraal.</p>
+                `
+            },
+            {
+                name: "Myrddraal",
+                shortDesc: "Captains of Trolloc armies",
+                details: `
+                    <p>Also known as Fades, Halfmen, Eyeless, or Neverborn, Myrddraal are terrifying, man-sized beings with pasty white skin and no eyes, yet they possess vision "like eagles". They are a "surprise offshoot" of Trolloc reproduction, a "throwback to the human side" of their ancestry, and are fundamentally evil, lacking independent moral judgment. Myrddraal are highly intelligent, possess superhuman agility and strength, and can travel by disappearing into shadows. Their cloaks do not move even in high wind, adding to their eerie presence. They serve as the captains and leaders of Trolloc armies, as Trollocs require direction to be effective in battle. The mere sight of a Fade is said to inspire supernatural fear in men. They are directly linked to the Dark One, who can use them as a voice to communicate with his followers.</p>
+                `
+            },
+             {
+                name: "Children of the Light (Whitecloaks)",
+                shortDesc: "Militarized order opposing channelers",
+                details: `
+                    <p>A quasi-religious, militarized order that believes all who channel the One Power are servants of the Shadow and seeks to destroy them. They capture Perrin and Egwene, believing Perrin's wolfbrother abilities mark him as a Darkfriend.</p>
+                `
+            },
+            {
+                name: "Elayne Trakand",
+                shortDesc: "Daughter-Heir of Andor",
+                details: `
+                    <p>The Daughter-Heir of Andor, whom Rand accidentally encounters in Caemlyn when he climbs a garden wall. Her brief appearance hints at future political and personal entanglements.</p>
+                `
+            },
+            {
+                name: "Queen Morgase Trakand",
+                shortDesc: "Queen of Andor",
+                details: `
+                    <p>The reigning Queen of Andor, whom Rand briefly meets in Caemlyn after his unexpected encounter with Elayne.</p>
+                `
+            },
+            {
+                name: "Elaida do Avriny a'Roihan",
+                shortDesc: "Aes Sedai advisor, Foreteller",
+                details: `
+                    <p>An Aes Sedai of the Red Ajah and a stern advisor to Queen Morgase, who possesses the rare ability of Foretelling. She foretells that Rand will "shake the world," a prophecy that deeply unsettles him.</p>
+                `
+            }
+        ];
+
+        const placesData = [
+            {
+                name: "The Two Rivers",
+                shortDesc: "The starting region, a semi-autonomous district in Andor.",
+                details: `
+                    <p>The story commences in the <strong>Two Rivers</strong>, a region depicted as a self-governing, semi-autonomous district nestled in the far southwestern corner of the Kingdom of Andor, approximately 1,200 miles from the capital city of Caemlyn. It is portrayed as a rural, bucolic backwater, largely overlooked by Andor, having seen no tax collectors or noble lords for generations. The district derives its name from its two bordering rivers: the <strong>River Tarendrelle</strong> (or Taren) to the north and the <strong>Manetherendrelle</strong> (or White River) to the south. The <strong>Winespring Water</strong> flows through the heart of the district, originating near Emond's Field and winding eastward into the Mire swamps. While geographically substantial, roughly a quarter the size of England, much of its area is uninhabitable due to the arid Sand Hills in the west and the swampy Mire and Waterwood to the east.</p>
+                    <p>The Two Rivers serves as more than just a quaint setting; it is a sheltered, innocent beginning, a "Shire-like" haven that is abruptly thrust into the larger world's conflicts. Its long-standing isolation makes the sudden, violent invasion by Shadowspawn particularly shocking and impactful. Historically, the region holds a profound, though often forgotten, significance: it is built on the site of <strong>Aemon's Field</strong>, where King Aemon of the ancient nation of <strong>Manetheren</strong> made a heroic last stand during the Trolloc Wars over 2,100 years prior, sacrificing himself and his army to allow his people to escape southwards. This deep, often forgotten history of heroism and sacrifice subtly underpins the current generation's journey, suggesting a cyclical nature to the struggle against the Shadow. Furthermore, the very geography of the Two Rivers is imbued with symbolic meaning, reflecting the grand cosmic patterns of the world. The Manetherendrelle and Taren rivers, encircling the region, represent the mythological World River and the Great Serpent of Time, while the Winespring Water symbolizes the True Source, with its divided male and female components. This intricate layering of symbolism means the land itself is a silent participant in the unfolding destiny, foreshadowing the larger conflicts and character arcs.</p>
+                `
+            },
+            {
+                name: "Emond's Field",
+                shortDesc: "The largest village in the Two Rivers, home of the protagonists.",
+                details: `
+                    <p>The largest village within the Two Rivers, Emond's Field is centered on the <strong>Green</strong>, a large open space that serves as the community's hub. Prominent buildings, such as the <strong>Winespring Inn</strong>—the largest inn and home of the village mayor—are clustered around this central green. The village grew organically around a crossroads formed by the main north/south road (known as the North Road to the north and the Old Road to the south) and the Quarry Road, which leads westward towards the Sand Hills. Farms and homesteads extend along the Winespring Water, contributing to the village's bucolic charm. Emond's Field is the unequivocal starting point of the heroes' journey, as Rand, Mat, and Perrin are forced to flee after the devastating Trolloc raid on Winternight. This attack shatters the villagers' long-held peace and propels them, and the reader, into the wider, more dangerous world.</p>
+                `
+            },
+            {
+                name: "Taren Ferry",
+                shortDesc: "A settlement on the northern border of the Two Rivers.",
+                details: `
+                    <p>A small settlement situated on the northern border of the Two Rivers, Taren Ferry is where the party crosses the Taren River, marking their first significant step beyond their homeland. The group travels from Emond's Field to Taren Ferry at an impressive speed, covering 50-60 miles in a single night, a feat aided by Moiraine's subtle use of the One Power to enhance their horses' stamina.</p>
+                `
+            },
+            {
+                name: "Baerlon",
+                shortDesc: "A fortified town in Andor, west of Whitebridge.",
+                details: `
+                    <p>The largest town in Andor west of Whitebridge, Baerlon is described as a reasonably large settlement, fortified with 20-foot tall wooden walls and guard towers. The Caemlyn Road, a major thoroughfare, passes directly through the town. Baerlon serves as a significant stop on the journey, where Nynaeve catches up to the group, Rand has a fateful encounter with Min Farshaw, and the party experiences a tense altercation with the zealous Children of the Light, followed by a direct confrontation with a Myrddraal, forcing their swift departure.</p>
+                `
+            },
+            {
+                name: "Shadar Logoth",
+                shortDesc: "An ancient, ruined, and cursed city.",
+                details: `
+                    <p>An ancient, ruined, and profoundly cursed city located on the banks of the Arinelle River. The party seeks dubious safety within its crumbling walls from pursuing Trollocs, hoping the city's malevolent reputation will deter their pursuers. However, Shadar Logoth is haunted by a pervasive, deadly mist known as <strong>Mashadar</strong>, a malevolent entity that corrupts all it touches. It is within this city that Mat Cauthon secretly takes a ruby-hilted dagger, which becomes a source of profound corruption and paranoia for him throughout the book. The city's evil is so potent that even Shadowspawn generally avoid it, though they eventually breach its defenses, leading to the party's separation.</p>
+                `
+            },
+            {
+                name: "Whitebridge",
+                shortDesc: "A town known for its prominent white bridge over the Arinelle.",
+                details: `
+                    <p>A town situated where the Caemlyn Road crosses the Arinelle river, distinguished by its prominent white bridge. This location marks a tragic point in the journey, as Rand and Mat are confronted by a Myrddraal, and Thom Merrilin heroically sacrifices himself to allow the boys to escape, a moment that deeply impacts them.</p>
+                `
+            },
+            {
+                name: "Caemlyn",
+                shortDesc: "The capital city of the Kingdom of Andor.",
+                details: `
+                    <p>The bustling capital city of the Kingdom of Andor, a large and strategically important urban center, located approximately 1,200 miles from the Two Rivers. During their time in Caemlyn, Rand has an accidental encounter with Elayne Trakand, the Daughter-Heir of Andor, and is subsequently brought before Queen Morgase and her Aes Sedai advisor, Elaida. Caemlyn serves as a crucial, albeit temporary, reunion point for the scattered members of the group, allowing them to regroup before the next phase of their journey.</p>
+                `
+            },
+            {
+                name: "The Ways",
+                shortDesc: "Ancient, dangerous paths for rapid travel.",
+                details: `
+                    <p>A network of ancient, alternative dimension paths, the Ways were meticulously created by the Ogier after the Breaking of the World to connect their distant steddings, allowing for remarkably rapid long-distance travel via stone Waygates. Once described as beautiful and filled with light, these paths have since become dark, rotting, and profoundly dangerous, infested by the soul-eating <strong>Machin Shin</strong>, a terrifying black wind. Compounding the peril, Trollocs have also discovered how to use the Ways, transforming them into a means for swift, covert movement for the Shadow's forces. Moiraine's party, desperate to reach the Eye of the World, utilizes the Ways as a perilous shortcut.</p>
+                `
+            },
+            {
+                name: "Fal Dara",
+                shortDesc: "A formidable Borderland city in the north.",
+                details: `
+                    <p>A formidable Borderland city located in the north, Fal Dara serves as a vital military stronghold, constantly guarding against incursions from the Great Blight. The group finds a brief respite and opportunity to regroup here after their harrowing escape from the Ways.</p>
+                `
+            },
+            {
+                name: "The Great Blight",
+                shortDesc: "A twisted, corrupted wilderness in the north.",
+                details: `
+                    <p>A twisted, corrupted wilderness bordering the northern reaches of the civilized world, the Great Blight stretches far across the Aryth Ocean. It is a land once verdant, now blighted and twisted by the pervasive influence of the Dark One, filled with grotesque monsters and Shadowspawn. Its very existence is a direct manifestation of the Dark One's proximity at Shayol Ghul, his prison. The landscape is described as rotten, gross, and inherently dangerous, where nearly every plant and animal is lethal, reflecting the profound corruption emanating from the source of evil. This portrayal of the Blight as a physical manifestation of the Dark One's influence underscores the pervasive and insidious nature of the Shadow's power, demonstrating that its corruption extends beyond mere moral decay to actively warp the very environment.</p>
+                `
+            },
+            {
+                name: "The Eye of the World",
+                shortDesc: "A pool of untainted saidin, the journey's destination.",
+                details: `
+                    <p>The ultimate destination of the journey, the Eye of the World is a profound and ancient location, described as a pool of untainted <em>saidin</em>, the pure essence of the male half of the One Power. It was created over three thousand years ago by Aes Sedai during the Breaking of the World, a reservoir of pure power preserved for a future purpose. It is protected by the ancient <strong>Green Man</strong> (Someshta), and is not a static place, but rather appears "at great need". As the party approaches, the blighted landscape around it miraculously transforms into a beautiful garden, a testament to its protective magic. Within the Eye are crucial artifacts: a seal on the Dark One's prison, the <strong>Dragon banner</strong> of Lews Therin Telamon, and the legendary <strong>Horn of Valere</strong>. The Dark One intends to poison or claim the Eye, recognizing its immense strategic and symbolic value.</p>
+                    <p>The Eye of the World functions as a profound crucible for Rand's identity and power. It is at this location that Rand experiences his first conscious use of the One Power, drawing directly from the untainted <em>saidin</em>. This unique experience profoundly alters his relationship with channeling; it allows him to "know what it should feel like without the corruption," leading to a deep revulsion for the tainted <em>saidin</em> he must wield in the future. This internal conflict, born from the purity of the Eye, sets a critical trajectory for his character development throughout the series. Furthermore, the Eye potentially awakens latent past-life memories within Rand, giving him glimpses of his previous incarnations and solidifying his connection to Lews Therin and the broader Pattern. Thus, the Eye is not merely a plot device for a climactic battle or a source of raw power; it is a transformative experience that fundamentally shapes Rand's perception of himself and his destiny, moving him from a reluctant farm boy to the prophesied champion, albeit one burdened by the knowledge of his power's inherent corruption.</p>
+                `
+            },
+            {
+                name: "Shayol Ghul",
+                shortDesc: "Site of the Bore, the Dark One's prison.",
+                details: `
+                    <p><strong>Shayol Ghul</strong> is the bleak and desolate site of the Bore, the thinnest point between the Dark One's prison and the world, serving as his primary headquarters. It is the undisputed source of the Great Blight's pervasive corruption.</p>
+                `
+            },
+            {
+                name: "Dragonmount",
+                shortDesc: "Volcanic peak created by Lews Therin Telamon.",
+                details: `
+                    <p><strong>Dragonmount</strong> is a towering volcanic peak created by the catastrophic self-destruction of Lews Therin Telamon at the end of the Age of Legends. It is prophesied to be the very birthplace of the Dragon Reborn, linking Rand's origin directly to the cataclysmic events of the past.</p>
+                `
+            }
+        ];
+
+
+        function setActiveTab(tabId) {
+            tabButtons.forEach(button => {
+                if (button.dataset.tab === tabId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+            contentSections.forEach(section => {
+                if (section.id === tabId) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+        }
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+        // Function to call Gemini API
+        async function callGeminiAPI(prompt) {
+            const apiKey = ""; // Canvas will provide this at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            try {
+                const chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error("Gemini API response structure unexpected:", result);
+                    return "Could not generate response. Please try again.";
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return "Failed to connect to the AI. Please check your network or try again later.";
+            }
+        }
+
+        // Initialize Characters
+        const characterList = document.getElementById('characterList');
+        const characterDetails = document.getElementById('characterDetails');
+        
+        charactersData.forEach(char => {
+            const li = document.createElement('li');
+            li.textContent = char.name;
+            li.className = 'p-2 rounded hover:bg-amber-100 text-amber-700 hover:text-amber-900 clickable-list-item';
+            li.addEventListener('click', async () => {
+                // Clear previous content and add character details
+                characterDetails.innerHTML = `<h3 class="text-2xl font-semibold text-amber-800 mb-4">${char.name}</h3><p class="italic text-stone-600 mb-4">${char.shortDesc}</p>${char.details}`;
+                
+                // Add the LLM button and output area
+                const quoteButton = document.createElement('button');
+                quoteButton.className = 'bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-full mt-4 text-sm shadow-md';
+                quoteButton.textContent = '✨ Generate Characteristic Quote';
+                characterDetails.appendChild(quoteButton);
+
+                const quoteOutput = document.createElement('div');
+                quoteOutput.className = 'mt-4 p-3 bg-amber-50 rounded-lg shadow-inner text-stone-700 text-sm italic hidden';
+                characterDetails.appendChild(quoteOutput);
+
+                quoteButton.addEventListener('click', async () => {
+                    quoteOutput.classList.remove('hidden');
+                    quoteOutput.innerHTML = '<p class="text-center">Generating quote... <span class="animate-pulse">⏳</span></p>';
+                    const prompt = `Generate a characteristic quote for ${char.name} from 'The Eye of the World' that captures their personality and role in the book. If they don't have a direct quote, create one that sounds like something they would say or summarizes their essence. Keep it concise.`;
+                    const generatedQuote = await callGeminiAPI(prompt);
+                    quoteOutput.innerHTML = `<p>"${generatedQuote}"</p>`;
+                });
+
+                document.querySelectorAll('#characterList li').forEach(item => item.classList.remove('bg-amber-200', 'font-semibold'));
+                li.classList.add('bg-amber-200', 'font-semibold');
+            });
+            characterList.appendChild(li);
+        });
+
+        // Initialize Places
+        const placeList = document.getElementById('placeList');
+        const placeDetails = document.getElementById('placeDetails');
+
+        placesData.forEach(place => {
+            const li = document.createElement('li');
+            li.textContent = place.name;
+            li.className = 'p-2 rounded hover:bg-amber-100 text-amber-700 hover:text-amber-900 clickable-list-item';
+            li.addEventListener('click', () => {
+                placeDetails.innerHTML = `<h3 class="text-2xl font-semibold text-amber-800 mb-4">${place.name}</h3><p class="italic text-stone-600 mb-4">${place.shortDesc}</p>${place.details}`;
+                document.querySelectorAll('#placeList li').forEach(item => item.classList.remove('bg-amber-200', 'font-semibold'));
+                li.classList.add('bg-amber-200', 'font-semibold');
+            });
+            placeList.appendChild(li);
+        });
+
+        // Initialize LLM Lore Explainer buttons in World & Lore section
+        const llmLoreButtons = document.querySelectorAll('.llm-lore-button');
+        llmLoreButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const concept = button.dataset.concept;
+                const outputDiv = button.nextElementSibling; // The div right after the button
+                
+                outputDiv.classList.remove('hidden');
+                outputDiv.innerHTML = '<p class="text-center">Generating explanation... <span class="animate-pulse">⏳</span></p>';
+
+                const prompt = `Provide a slightly deeper or alternative explanation for "${concept}" from 'The Wheel of Time' series, focusing on its significance in 'The Eye of the World'. Keep the explanation concise and informative.`;
+                const generatedExplanation = await callGeminiAPI(prompt);
+                outputDiv.innerHTML = `<p>${generatedExplanation}</p>`;
+            });
+        });
+
+        // Set initial active tab
+        setActiveTab('overview');
+
+    </script>
+</body>
+</html>
