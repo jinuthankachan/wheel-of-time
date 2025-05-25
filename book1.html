@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Eye of the World - Interactive Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Application Structure Plan: Tab-based navigation: Overview, World & Lore, Characters, Relationships, Places, Prophecies.
+    <!-- Application Structure Plan: Tab-based navigation: Overview, World & Lore, Characters, Relationships, Places, Prophecies, Storyline.
         - Overview: Combines Introduction and Conclusion from the report for initial context.
         - World & Lore: Presents key cosmological concepts (Wheel/Pattern, Creator/Dark One, One Power, Age of Legends/Breaking).
         - Characters: Features a clickable list of characters. Selecting a character displays a detailed profile, drawing data from both the report's textual descriptions and the character table.
         - Relationships: Contains subsections detailing key relationship dynamics as outlined in Section IV of the report.
         - Places: Offers a clickable list of significant locations, with a detail view for each.
         - Prophecies: Dedicated section for the Karaethon Cycle.
+        - Storyline: Provides a chronological summary of the book's major plot points and key events.
         This structure aims to break down the dense information of the literary analysis into digestible, thematic sections. The interactive lists for characters and places allow users to explore specific details without being overwhelmed, enhancing usability and focused learning.
     -->
     <!-- Visualization & Content Choices:
@@ -21,6 +22,7 @@
         - Report Info: Relationship analyses (Section IV text) -> Goal: Inform, Compare -> Viz/Method: "Relationships" tab with distinct text sections for each key relationship dynamic -> Interaction: Read -> Justification: Provides a focused area for understanding character interconnections as described. Library/Method: HTML.
         - Report Info: Place descriptions (Section V) -> Goal: Inform, Organize -> Viz/Method: "Places" tab, interactive list linked to a detail display pane -> Interaction: Click list item to view place details -> Justification: Allows structured exploration of the world's geography and its significance. Library/Method: HTML, JavaScript.
         - Report Info: Karaethon Cycle (Prophecies, end of Section II) -> Goal: Inform -> Viz/Method: "Prophecies" tab, structured text -> Interaction: Read -> Justification: Highlights crucial plot-driving prophecies. Library/Method: HTML.
+        - Report Info: Full Plot Summary -> Goal: Inform, Summarize -> Viz/Method: "Storyline" tab, chronological text summary -> Interaction: Read -> Justification: Provides a narrative overview of the entire book for quick understanding. Library/Method: HTML.
         - No quantitative data suitable for Chart.js/Plotly was present in the literary analysis. The application focuses on interactive presentation of textual and structural information.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
     -->
@@ -95,6 +97,7 @@
                 <button data-tab="relationships" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Relationships</button>
                 <button data-tab="places" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Places</button>
                 <button data-tab="prophecies" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Prophecies</button>
+                <button data-tab="storyline" class="tab-button py-3 px-2 sm:px-4 text-sm sm:text-base text-amber-700 hover:text-amber-900">Storyline</button>
             </div>
         </nav>
     </header>
@@ -192,6 +195,27 @@
                 <li>The Dragon will be reborn on the slopes of <strong>Dragonmount</strong>, born "of a maiden wedded to no man" and "raised by the old blood". This prophecy directly relates to the revelation of Rand's origins.</li>
                 <li>The Dragon Reborn will "face the Shadow and bring forth Light again in the world" at Tarmon Gai'don, yet his coming will also bring "wailing and gnashing of teeth," indicating immense suffering alongside salvation. These prophecies underscore the immense burden and often tragic nature of the Dragon Reborn's destiny, as his arrival heralds both hope and widespread devastation.</li>
             </ul>
+        </div>
+
+        <div id="storyline" class="content-section prose max-w-none">
+            <p class="section-intro">This section provides a chronological summary of the entire storyline of *The Eye of the World*, highlighting all the key events and plot developments. It's designed to give you a quick overview of the narrative's progression, from the peaceful beginnings in Emond's Field to the climactic confrontation at the Eye of the World.</p>
+            <h2>The Journey Begins: From Innocence to Peril</h2>
+            <p>The story opens in the peaceful, isolated village of Emond's Field in the Two Rivers, where life is simple for the young protagonists Rand al'Thor, Matrim Cauthon, and Perrin Aybara. Their lives are irrevocably changed with the arrival of the enigmatic Aes Sedai, Moiraine Damodred, and her stoic Warder, Lan Mandragoran, who bring with them whispers of ancient evils and a grim prophecy. On the night of Winternight, the village is brutally attacked by Trollocs and a terrifying Myrddraal, forcing Rand, Mat, Perrin, along with Egwene al'Vere and Nynaeve al'Meara, to flee their homes under Moiraine's guidance.</p>
+
+            <h2>Flight and Separation</h2>
+            <p>The group's desperate flight takes them through various towns and dangers. They cross the Taren River at Taren Ferry and arrive in Baerlon, where Nynaeve, the village Wisdom, catches up to them, having tracked them with surprising skill. In Baerlon, Rand has a fateful encounter with Min Farshaw, a young woman with a unique ability to see glimpses of people's futures, and they face a tense confrontation with the zealous Children of the Light (Whitecloaks), who view all channelers as servants of the Shadow. A direct attack by a Myrddraal forces their swift departure from Baerlon. Seeking refuge from pursuing Shadowspawn, the party enters the ancient, cursed city of Shadar Logoth. Despite Moiraine's warnings, Mat secretly takes a ruby-hilted dagger from the city, which slowly begins to corrupt him, inducing paranoia and hostility. The malevolent mist of Mashadar within Shadar Logoth eventually forces the group to scatter, separating Rand and Mat from Moiraine, Lan, Perrin, Egwene, and Nynaeve.</p>
+
+            <h2>Reunions and New Allies</h2>
+            <p>Rand and Mat, now alone, continue their perilous journey, eventually reaching Whitebridge, where they are confronted by another Myrddraal. Thom Merrilin, a traveling gleeman who had joined them earlier, heroically sacrifices himself to allow the boys to escape, leaving a lasting impact on them. Meanwhile, Perrin and Egwene, also separated from the main group, encounter Elyas Machera, a grizzled tracker who reveals himself to be a fellow wolfbrother, helping Perrin understand his newly discovered telepathic connection with wolves. This newfound ability, however, leads the Children of the Light to mistakenly believe Perrin is a Darkfriend, resulting in dangerous encounters. The scattered group eventually begins to converge on Caemlyn, the bustling capital of Andor. Here, Rand has an accidental encounter with Elayne Trakand, the Daughter-Heir of Andor, and is subsequently brought before Queen Morgase and her Aes Sedai advisor, Elaida, who foretells that Rand will "shake the world." In Caemlyn, the full group, including Loial, a gentle Ogier who joins them and offers his knowledge of the ancient Ways, finally reunites.</p>
+
+            <h2>The Perilous Path to the Eye</h2>
+            <p>With the Shadow closing in, Moiraine decides their only hope is to use the Ways, a network of ancient, alternative dimension paths created by the Ogier, to reach the Eye of the World quickly. The Ways, once beautiful, are now dark, rotting, and infested by the soul-eating black wind known as Machin Shin, making the journey incredibly perilous. They emerge from the Ways into Fal Dara, a formidable Borderland city constantly guarding against incursions from the Great Blight. After a brief respite, they venture into the Great Blight itself, a twisted, corrupted wilderness that physically manifests the Dark One's malevolent influence, filled with grotesque monsters and Shadowspawn. The Blight is a direct reflection of the Dark One's proximity at Shayol Ghul, his prison.</p>
+
+            <h2>Climax at the Eye of the World</h2>
+            <p>The journey culminates at the Eye of the World, a profound and ancient location described as a pool of untainted *saidin*, the pure essence of the male half of the One Power, created by Aes Sedai during the Breaking of the World. It is protected by the ancient Green Man (Someshta), the last surviving member of the Nym. As they approach, the blighted landscape miraculously transforms into a beautiful garden. Within the Eye, they discover crucial artifacts: a seal on the Dark One's prison, the Dragon banner of Lews Therin Telamon, and the legendary Horn of Valere. The Dark One intends to poison or claim the Eye. Here, Rand experiences his first conscious use of the One Power, drawing directly from the untainted *saidin* to defeat two of the Forsaken, Aginor and Balthamel, and strike a powerful, though not definitive, blow against Ba'alzamon (revealed to be Ishamael). This experience profoundly alters Rand's relationship with channeling, giving him a unique awareness of *saidin*'s taint and awakening latent past-life memories, solidifying his identity as the Dragon Reborn.</p>
+
+            <h2>Aftermath and Future Foreshadowing</h2>
+            <p>The battle at the Eye of the World confirms Rand's identity as the Dragon Reborn, a realization he struggles to accept. The Dragon banner is unfurled, and the Horn of Valere is recovered, signaling the beginning of a new era. The novel concludes with the protagonists facing the daunting implications of Rand's destiny and the knowledge that the struggle against the Shadow is far from over, setting the stage for the epic saga to continue.</p>
         </div>
     </main>
 
