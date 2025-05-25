@@ -83,11 +83,21 @@
             border-left: 4px solid #d97706; /* amber-600 */
             border-radius: 0.25rem;
         }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
+
+        /* Table Specific Styles for Scrollability and Sticky Headers/Columns */
+        .table-responsive-container {
+            overflow: auto; /* Enable both horizontal and vertical scrolling */
+            max-height: 500px; /* Max height for vertical scrolling */
             margin-top: 1.5em;
             margin-bottom: 1.5em;
+            border: 1px solid #e7e5e4; /* Add a border to the container */
+            border-radius: 0.25rem; /* Rounded corners for the container */
+        }
+
+        .data-table {
+            width: 100%; /* Ensure table takes full width of its container */
+            border-collapse: collapse;
+            min-width: max-content; /* Allow table to grow beyond container for horizontal scroll */
         }
         .data-table th, .data-table td {
             border: 1px solid #e7e5e4; /* stone-200 */
@@ -96,12 +106,37 @@
             vertical-align: top;
         }
         .data-table th {
+            position: sticky;
+            top: 0;
             background-color: #f59e0b; /* amber-500 */
             color: white;
             font-weight: 600;
+            z-index: 20; /* Higher z-index than sticky column to overlap */
         }
-        .data-table tr:nth-child(even) {
+
+        /* Sticky first column */
+        .data-table th:first-child,
+        .data-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 15; /* Lower than sticky header, higher than normal cells */
+            background-color: inherit; /* Inherit background from row */
+            border-right: 1px solid #e7e5e4; /* Add a right border to distinguish */
+        }
+
+        /* Specific background for sticky first column header (top-left corner) */
+        .data-table th:first-child {
+            background-color: #f59e0b; /* amber-500 */
+            z-index: 25; /* Highest z-index for the top-left corner */
+        }
+
+        /* Ensure background for sticky cells in even rows */
+        .data-table tr:nth-child(even) td:first-child {
             background-color: #fffbeb; /* amber-50 */
+        }
+        /* Ensure background for sticky cells in odd rows */
+        .data-table tr:nth-child(odd) td:first-child {
+            background-color: white; /* Default background for odd rows */
         }
     </style>
 </head>
@@ -167,57 +202,59 @@
             <p>Beyond the Dragon Reborn, other significant legends populate the world. Artur Hawkwing is a renowned hero who once ruled vast lands and dispatched armies across the Aryth Ocean. The Tuatha'an, also known as the Tinkers, are a nomadic people who travel in brightly colored wagons, adhering to the pacifistic "Way of the Leaf" and perpetually searching for "The Song," a lost melody from the Age of Legends.</p>
 
             <h3 class="mt-8">Table 1: Key World Lore Concepts in The Eye of the World</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Concept Name</th>
-                        <th>Brief Description</th>
-                        <th>Significance in The Eye of the World</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>The Wheel of Time</td>
-                        <td>Cosmic entity that weaves the Pattern of Ages, dictating a cyclical nature of time and destiny.</td>
-                        <td>Establishes the fundamental metaphysical framework of the world and the idea that history repeats.</td>
-                    </tr>
-                    <tr>
-                        <td>The One Power (Saidin/Saidar)</td>
-                        <td>Magical force driving the Wheel, divided into male (saidin) and female (saidar) halves.</td>
-                        <td>Defines the magic system and introduces the core conflict of male channeler madness.</td>
-                    </tr>
-                    <tr>
-                        <td>Age of Legends</td>
-                        <td>A utopian past with advanced technology and both male and female channelers.</td>
-                        <td>Provides historical context for the current world's state and the origin of the Dark One's prison.</td>
-                    </tr>
-                    <tr>
-                        <td>Lews Therin Telamon (The Dragon)</td>
-                        <td>A powerful male channeler from the Age of Legends who successfully sealed the Dark One but caused the Breaking.</td>
-                        <td>Establishes the legend of the Dragon and the prophecy of his reincarnation.</td>
-                    </tr>
-                    <tr>
-                        <td>The Breaking of the World</td>
-                        <td>A catastrophic period of devastation caused by mad male channelers after saidin was tainted.</td>
-                        <td>Explains the current fragmented state of the world and the widespread fear of male channelers.</td>
-                    </tr>
-                    <tr>
-                        <td>The Dark One</td>
-                        <td>The primordial evil, antithesis to the Creator, imprisoned but constantly influencing the world.</td>
-                        <td>The ultimate antagonist and the source of the Shadowspawn and the taint on saidin.</td>
-                    </tr>
-                    <tr>
-                        <td>Aes Sedai</td>
-                        <td>A matriarchal order of female channelers who serve and protect humanity.</td>
-                        <td>The primary wielders of organized power for the Light, both feared and respected, and central to guiding the Dragon Reborn.</td>
-                    </tr>
-                    <tr>
-                        <td>Dragon Reborn Prophecy</td>
-                        <td>The foretelling of the Dragon's reincarnation, destined to fight the Dark One again.</td>
-                        <td>The central driving force of the plot, determining Rand al'Thor's unfolding destiny.</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Concept Name</th>
+                            <th>Brief Description</th>
+                            <th>Significance in The Eye of the World</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>The Wheel of Time</td>
+                            <td>Cosmic entity that weaves the Pattern of Ages, dictating a cyclical nature of time and destiny.</td>
+                            <td>Establishes the fundamental metaphysical framework of the world and the idea that history repeats.</td>
+                        </tr>
+                        <tr>
+                            <td>The One Power (Saidin/Saidar)</td>
+                            <td>Magical force driving the Wheel, divided into male (saidin) and female (saidar) halves.</td>
+                            <td>Defines the magic system and introduces the core conflict of male channeler madness.</td>
+                        </tr>
+                        <tr>
+                            <td>Age of Legends</td>
+                            <td>A utopian past with advanced technology and both male and female channelers.</td>
+                            <td>Provides historical context for the current world's state and the origin of the Dark One's prison.</td>
+                        </tr>
+                        <tr>
+                            <td>Lews Therin Telamon (The Dragon)</td>
+                            <td>A powerful male channeler from the Age of Legends who successfully sealed the Dark One but caused the Breaking.</td>
+                            <td>Establishes the legend of the Dragon and the prophecy of his reincarnation.</td>
+                        </tr>
+                        <tr>
+                            <td>The Breaking of the World</td>
+                            <td>A catastrophic period of devastation caused by mad male channelers after saidin was tainted.</td>
+                            <td>Explains the current fragmented state of the world and the widespread fear of male channelers.</td>
+                        </tr>
+                        <tr>
+                            <td>The Dark One</td>
+                            <td>The primordial evil, antithesis to the Creator, imprisoned but constantly influencing the world.</td>
+                            <td>The ultimate antagonist and the source of the Shadowspawn and the taint on saidin.</td>
+                        </tr>
+                        <tr>
+                            <td>Aes Sedai</td>
+                            <td>A matriarchal order of female channelers who serve and protect humanity.</td>
+                            <td>The primary wielders of organized power for the Light, both feared and respected, and central to guiding the Dragon Reborn.</td>
+                        </tr>
+                        <tr>
+                            <td>Dragon Reborn Prophecy</td>
+                            <td>The foretelling of the Dragon's reincarnation, destined to fight the Dark One again.</td>
+                            <td>The central driving force of the plot, determining Rand al'Thor's unfolding destiny.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="characters" class="content-section">
@@ -232,96 +269,98 @@
                 </div>
             </div>
             <h3 class="mt-8">Table 2: Main Characters and Key Traits in The Eye of the World</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Character Name</th>
-                        <th>Role/Affiliation</th>
-                        <th>Key Personality Traits</th>
-                        <th>Brief Physical Description</th>
-                        <th>Initial Key Action/Struggle</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Rand al'Thor</td>
-                        <td>Shepherd, unknowingly the Dragon Reborn</td>
-                        <td>Mild-mannered, protective, stubborn, naive, socially awkward.</td>
-                        <td>Tall, reddish hair, blue-gray eyes.</td>
-                        <td>Attacked by Trollocs, begins experiencing prophetic nightmares.</td>
-                    </tr>
-                    <tr>
-                        <td>Mat Cauthon</td>
-                        <td>Prankster, friend of Rand</td>
-                        <td>Mischievous, charming, loyal, outwardly carefree, prone to paranoia.</td>
-                        <td>Wiry, dark-haired, dark-eyed.</td>
-                        <td>Steals cursed dagger from Shadar Logoth, becomes ill.</td>
-                    </tr>
-                    <tr>
-                        <td>Perrin Aybara</td>
-                        <td>Blacksmith, friend of Rand</td>
-                        <td>Gentle, thoughtful, strong, slow to anger, shy.</td>
-                        <td>Muscular, brown hair, brown eyes (later golden).</td>
-                        <td>Discovers ability to communicate with wolves, struggles with identity.</td>
-                    </tr>
-                    <tr>
-                        <td>Egwene al'Vere</td>
-                        <td>Mayor's daughter, friend of Rand, potential channeler</td>
-                        <td>Determined, ambitious, quick to learn, stubborn.</td>
-                        <td>Short, slim, brown hair, large brown eyes.</td>
-                        <td>Joins the flight from Emond's Field, shows channeling potential.</td>
-                    </tr>
-                    <tr>
-                        <td>Nynaeve al'Meara</td>
-                        <td>Village Wisdom</td>
-                        <td>Fierce, stubborn, caretaker, quick to anger, powerful healer.</td>
-                        <td>Slender, dark hair in braid, dark eyes.</td>
-                        <td>Hunts down the group, discovers strong channeling ability.</td>
-                    </tr>
-                    <tr>
-                        <td>Moiraine Damodred</td>
-                        <td>Aes Sedai (Blue Ajah)</td>
-                        <td>Mysterious, intelligent, single-minded, manipulative, cool demeanor.</td>
-                        <td>Short, dark eyes, hair in ringlets.</td>
-                        <td>Seeks the Dragon Reborn, guides the group.</td>
-                    </tr>
-                    <tr>
-                        <td>Lan Mandragoran</td>
-                        <td>Moiraine's Warder</td>
-                        <td>Stoic, loyal, skilled warrior, reserved but deeply feeling.</td>
-                        <td>Tall, angular features, blue eyes.</td>
-                        <td>Protects Moiraine and the group, trains Rand in swordplay.</td>
-                    </tr>
-                    <tr>
-                        <td>Thom Merrilin</td>
-                        <td>Traveling Gleeman</td>
-                        <td>Intelligent, crafty, protective, sarcastic, distrustful of Aes Sedai.</td>
-                        <td>Leathery face, white hair/mustaches.</td>
-                        <td>Appears to sacrifice himself for Rand and Mat.</td>
-                    </tr>
-                    <tr>
-                        <td>Min Farshaw</td>
-                        <td>Seer</td>
-                        <td>Independent, loyal, perceptive, initially feels cursed by gift.</td>
-                        <td>Short, curling brown hair, dark eyes, dresses unconventionally.</td>
-                        <td>Sees prophetic auras/visions around Rand.</td>
-                    </tr>
-                    <tr>
-                        <td>Loial</td>
-                        <td>Ogier</td>
-                        <td>Book-loving, gentle, wise, socially awkward.</td>
-                        <td>Tall (10 ft), pointed ears, shaggy black hair.</td>
-                        <td>Guides group through the Ways, recognizes Rand as ta'veren.</td>
-                    </tr>
-                    <tr>
-                        <td>Padan Fain</td>
-                        <td>Peddler, Darkfriend</td>
-                        <td>Deceptive, chaotic, driven by revenge, corrupting.</td>
-                        <td>(Appearance changes due to corruption)</td>
-                        <td>Tracks the Emond's Fielders, later merges with Mordeth.</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Character Name</th>
+                            <th>Role/Affiliation</th>
+                            <th>Key Personality Traits</th>
+                            <th>Brief Physical Description</th>
+                            <th>Initial Key Action/Struggle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rand al'Thor</td>
+                            <td>Shepherd, unknowingly the Dragon Reborn</td>
+                            <td>Mild-mannered, protective, stubborn, naive, socially awkward.</td>
+                            <td>Tall, reddish hair, blue-gray eyes.</td>
+                            <td>Attacked by Trollocs, begins experiencing prophetic nightmares.</td>
+                        </tr>
+                        <tr>
+                            <td>Mat Cauthon</td>
+                            <td>Prankster, friend of Rand</td>
+                            <td>Mischievous, charming, loyal, outwardly carefree, prone to paranoia.</td>
+                            <td>Wiry, dark-haired, dark-eyed.</td>
+                            <td>Steals cursed dagger from Shadar Logoth, becomes ill.</td>
+                        </tr>
+                        <tr>
+                            <td>Perrin Aybara</td>
+                            <td>Blacksmith, friend of Rand</td>
+                            <td>Gentle, thoughtful, strong, slow to anger, shy.</td>
+                            <td>Muscular, brown hair, brown eyes (later golden).</td>
+                            <td>Discovers ability to communicate with wolves, struggles with identity.</td>
+                        </tr>
+                        <tr>
+                            <td>Egwene al'Vere</td>
+                            <td>Mayor's daughter, friend of Rand, potential channeler</td>
+                            <td>Determined, ambitious, quick to learn, stubborn.</td>
+                            <td>Short, slim, brown hair, large brown eyes.</td>
+                            <td>Joins the flight from Emond's Field, shows channeling potential.</td>
+                        </tr>
+                        <tr>
+                            <td>Nynaeve al'Meara</td>
+                            <td>Village Wisdom</td>
+                            <td>Fierce, stubborn, caretaker, quick to anger, powerful healer.</td>
+                            <td>Slender, dark hair in braid, dark eyes.</td>
+                            <td>Hunts down the group, discovers strong channeling ability.</td>
+                        </tr>
+                        <tr>
+                            <td>Moiraine Damodred</td>
+                            <td>Aes Sedai (Blue Ajah)</td>
+                            <td>Mysterious, intelligent, single-minded, manipulative, cool demeanor.</td>
+                            <td>Short, dark eyes, hair in ringlets.</td>
+                            <td>Seeks the Dragon Reborn, guides the group.</td>
+                        </tr>
+                        <tr>
+                            <td>Lan Mandragoran</td>
+                            <td>Moiraine's Warder</td>
+                            <td>Stoic, loyal, skilled warrior, reserved but deeply feeling.</td>
+                            <td>Tall, angular features, blue eyes.</td>
+                            <td>Protects Moiraine and the group, trains Rand in swordplay.</td>
+                        </tr>
+                        <tr>
+                            <td>Thom Merrilin</td>
+                            <td>Traveling Gleeman</td>
+                            <td>Intelligent, crafty, protective, sarcastic, distrustful of Aes Sedai.</td>
+                            <td>Leathery face, white hair/mustaches.</td>
+                            <td>Appears to sacrifice himself for Rand and Mat.</td>
+                        </tr>
+                        <tr>
+                            <td>Min Farshaw</td>
+                            <td>Seer</td>
+                            <td>Independent, loyal, perceptive, initially feels cursed by gift.</td>
+                            <td>Short, curling brown hair, dark eyes, dresses unconventionally.</td>
+                            <td>Sees prophetic auras/visions around Rand.</td>
+                        </tr>
+                        <tr>
+                            <td>Loial</td>
+                            <td>Ogier</td>
+                            <td>Book-loving, gentle, wise, socially awkward.</td>
+                            <td>Tall (10 ft), pointed ears, shaggy black hair.</td>
+                            <td>Guides group through the Ways, recognizes Rand as ta'veren.</td>
+                        </tr>
+                        <tr>
+                            <td>Padan Fain</td>
+                            <td>Peddler, Darkfriend</td>
+                            <td>Deceptive, chaotic, driven by revenge, corrupting.</td>
+                            <td>(Appearance changes due to corruption)</td>
+                            <td>Tracks the Emond's Fielders, later merges with Mordeth.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="relationships" class="content-section prose max-w-none">
@@ -345,207 +384,209 @@
             <h3>Rand's Confrontations: Conflict with the Dark One and Forsaken</h3>
             <p>Rand's destiny as the Dragon Reborn places him in direct and fated opposition to the Dark One and his most powerful servants, the Forsaken. His recurring nightmares feature the Dark One, often appearing as Ba'alzamon (the disguised Forsaken Ishamael), who attempts to tempt and manipulate him, offering power or threatening destruction. The climax at the Eye of the World marks Rand's first direct confrontation with two of the Forsaken, Aginor and Balthamel, and culminates in a powerful, though perhaps not definitive, strike against Ba'alzamon himself. This series of encounters solidifies Rand's role as the primary champion against the Shadow, establishing a relationship of fated opposition where the very survival of the world hangs in the balance.</p>
             <h3 class="mt-8">Table 3: Character Relationships Matrix in The Eye of the World</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Character</th>
-                        <th>Rand al'Thor</th>
-                        <th>Mat Cauthon</th>
-                        <th>Perrin Aybara</th>
-                        <th>Egwene al'Vere</th>
-                        <th>Nynaeve al'Meara</th>
-                        <th>Moiraine Damodred</th>
-                        <th>Lan Mandragoran</th>
-                        <th>Thom Merrilin</th>
-                        <th>Min Farshaw</th>
-                        <th>Loial</th>
-                        <th>Padan Fain</th>
-                        <th>Elyas Machera</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Rand al'Thor</td>
-                        <td>-</td>
-                        <td>Best Friend, ta'veren, shared nightmares, separated</td>
-                        <td>Best Friend, ta'veren, shared nightmares, separated</td>
-                        <td>Childhood Sweetheart/Friend, potential lovers but not destined</td>
-                        <td>Village Wisdom/Caretaker, later ally, fiercely protective</td>
-                        <td>Protégé/Mentor, Moiraine guides him as potential Dragon Reborn, Rand initially mistrusts her</td>
-                        <td>Student/Mentor (swordplay), protector</td>
-                        <td>Protected/Protector, Thom sacrifices himself for Rand</td>
-                        <td>Subject of visions/Seer, Min's visions reveal Rand's destiny</td>
-                        <td>Ally/Guide, Loial recognizes him as ta'veren</td>
-                        <td>Antagonist, tracked by Fain, target of Shadow</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Mat Cauthon</td>
-                        <td>Best Friend, ta'veren, shared nightmares, separated</td>
-                        <td>-</td>
-                        <td>Best Friend, ta'veren, separated</td>
-                        <td>Friend</td>
-                        <td>Friend</td>
-                        <td>Guide/Guided, Moiraine seeks to heal him</td>
-                        <td>-</td>
-                        <td>Protected/Protector, travel together</td>
-                        <td>Friend (later strong friendship)</td>
-                        <td>Ally</td>
-                        <td>Victim/Antagonist, Fain's dagger infects Mat</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Perrin Aybara</td>
-                        <td>Best Friend, ta'veren, shared nightmares, separated</td>
-                        <td>Best Friend, ta'veren, separated</td>
-                        <td>-</td>
-                        <td>Friend, travel together after separation, rescued together</td>
-                        <td>Wisdom/Ally, Nynaeve helps rescue him</td>
-                        <td>Guide/Guided, Moiraine seeks to protect him</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                        <td>Protégé/Mentor, Elyas explains Wolfbrother abilities</td>
-                    </tr>
-                    <tr>
-                        <td>Egwene al'Vere</td>
-                        <td>Childhood Sweetheart/Friend, potential lovers but not destined</td>
-                        <td>Friend</td>
-                        <td>Friend, travel together after separation, rescued together</td>
-                        <td>-</td>
-                        <td>Wisdom/Apprentice, later fellow channeler, Nynaeve is protective</td>
-                        <td>Protégé/Mentor, Moiraine identifies her channeling potential</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Nynaeve al'Meara</td>
-                        <td>Village Wisdom/Caretaker, later ally, fiercely protective</td>
-                        <td>Friend</td>
-                        <td>Wisdom/Ally, Nynaeve helps rescue him</td>
-                        <td>Wisdom/Apprentice, later fellow channeler, Nynaeve is protective</td>
-                        <td>-</td>
-                        <td>Complex relationship, initially contentious, evolves to shared purpose</td>
-                        <td>Developing Romantic Interest, mutual respect</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Moiraine Damodred</td>
-                        <td>Protégé/Mentor, Moiraine guides him as potential Dragon Reborn, Rand initially mistrusts her</td>
-                        <td>Guide/Guided, Moiraine seeks to heal him</td>
-                        <td>Guide/Guided, Moiraine seeks to protect him</td>
-                        <td>Protégé/Mentor, Moiraine identifies her channeling potential</td>
-                        <td>Complex relationship, initially contentious, evolves to shared purpose</td>
-                        <td>-</td>
-                        <td>Aes Sedai/Warder, deep bond of trust, professional partners</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Antagonist (target of Moiraine's quest)</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Lan Mandragoran</td>
-                        <td>Student/Mentor (swordplay), protector</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Developing Romantic Interest, mutual respect</td>
-                        <td>Aes Sedai/Warder, deep bond of trust, professional partners</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Thom Merrilin</td>
-                        <td>Protected/Protector, Thom sacrifices himself for Rand</td>
-                        <td>Protected/Protector, travel together</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Min Farshaw</td>
-                        <td>Subject of visions/Seer, Min's visions reveal Rand's destiny</td>
-                        <td>Friend (later strong friendship)</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Loial</td>
-                        <td>Ally/Guide, Loial recognizes him as ta'veren</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Ally</td>
-                        <td>Ally/Guide, warns Moiraine about Eye of the World</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Ally</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Padan Fain</td>
-                        <td>Antagonist, tracked by Fain, target of Shadow</td>
-                        <td>Victim/Antagonist, Fain's dagger infects Mat</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Antagonist (target of Moiraine's quest)</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>Elyas Machera</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Protégé/Mentor, Elyas explains Wolfbrother abilities</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Character</th>
+                            <th>Rand al'Thor</th>
+                            <th>Mat Cauthon</th>
+                            <th>Perrin Aybara</th>
+                            <th>Egwene al'Vere</th>
+                            <th>Nynaeve al'Meara</th>
+                            <th>Moiraine Damodred</th>
+                            <th>Lan Mandragoran</th>
+                            <th>Thom Merrilin</th>
+                            <th>Min Farshaw</th>
+                            <th>Loial</th>
+                            <th>Padan Fain</th>
+                            <th>Elyas Machera</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rand al'Thor</td>
+                            <td>-</td>
+                            <td>Best Friend, ta'veren, shared nightmares, separated</td>
+                            <td>Best Friend, ta'veren, shared nightmares, separated</td>
+                            <td>Childhood Sweetheart/Friend, potential lovers but not destined</td>
+                            <td>Village Wisdom/Caretaker, later ally, fiercely protective</td>
+                            <td>Protégé/Mentor, Moiraine guides him as potential Dragon Reborn, Rand initially mistrusts her</td>
+                            <td>Student/Mentor (swordplay), protector</td>
+                            <td>Protected/Protector, Thom sacrifices himself for Rand</td>
+                            <td>Subject of visions/Seer, Min's visions reveal Rand's destiny</td>
+                            <td>Ally/Guide, Loial recognizes him as ta'veren</td>
+                            <td>Antagonist, tracked by Fain, target of Shadow</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Mat Cauthon</td>
+                            <td>Best Friend, ta'veren, shared nightmares, separated</td>
+                            <td>-</td>
+                            <td>Best Friend, ta'veren, separated</td>
+                            <td>Friend</td>
+                            <td>Friend</td>
+                            <td>Guide/Guided, Moiraine seeks to heal him</td>
+                            <td>-</td>
+                            <td>Protected/Protector, travel together</td>
+                            <td>Friend (later strong friendship)</td>
+                            <td>Ally</td>
+                            <td>Victim/Antagonist, Fain's dagger infects Mat</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Perrin Aybara</td>
+                            <td>Best Friend, ta'veren, shared nightmares, separated</td>
+                            <td>Best Friend, ta'veren, separated</td>
+                            <td>-</td>
+                            <td>Friend, travel together after separation, rescued together</td>
+                            <td>Wisdom/Ally, Nynaeve helps rescue him</td>
+                            <td>Guide/Guided, Moiraine seeks to protect him</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                            <td>Protégé/Mentor, Elyas explains Wolfbrother abilities</td>
+                        </tr>
+                        <tr>
+                            <td>Egwene al'Vere</td>
+                            <td>Childhood Sweetheart/Friend, potential lovers but not destined</td>
+                            <td>Friend</td>
+                            <td>Friend, travel together after separation, rescued together</td>
+                            <td>-</td>
+                            <td>Wisdom/Apprentice, later fellow channeler, Nynaeve is protective</td>
+                            <td>Protégé/Mentor, Moiraine identifies her channeling potential</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Nynaeve al'Meara</td>
+                            <td>Village Wisdom/Caretaker, later ally, fiercely protective</td>
+                            <td>Friend</td>
+                            <td>Wisdom/Ally, Nynaeve helps rescue him</td>
+                            <td>Wisdom/Apprentice, later fellow channeler, Nynaeve is protective</td>
+                            <td>-</td>
+                            <td>Complex relationship, initially contentious, evolves to shared purpose</td>
+                            <td>Developing Romantic Interest, mutual respect</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Moiraine Damodred</td>
+                            <td>Protégé/Mentor, Moiraine guides him as potential Dragon Reborn, Rand initially mistrusts her</td>
+                            <td>Guide/Guided, Moiraine seeks to heal him</td>
+                            <td>Guide/Guided, Moiraine seeks to protect him</td>
+                            <td>Protégé/Mentor, Moiraine identifies her channeling potential</td>
+                            <td>Complex relationship, initially contentious, evolves to shared purpose</td>
+                            <td>-</td>
+                            <td>Aes Sedai/Warder, deep bond of trust, professional partners</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Antagonist (target of Moiraine's quest)</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Lan Mandragoran</td>
+                            <td>Student/Mentor (swordplay), protector</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Developing Romantic Interest, mutual respect</td>
+                            <td>Aes Sedai/Warder, deep bond of trust, professional partners</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Thom Merrilin</td>
+                            <td>Protected/Protector, Thom sacrifices himself for Rand</td>
+                            <td>Protected/Protector, travel together</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Min Farshaw</td>
+                            <td>Subject of visions/Seer, Min's visions reveal Rand's destiny</td>
+                            <td>Friend (later strong friendship)</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Loial</td>
+                            <td>Ally/Guide, Loial recognizes him as ta'veren</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Ally</td>
+                            <td>Ally/Guide, warns Moiraine about Eye of the World</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Ally</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Padan Fain</td>
+                            <td>Antagonist, tracked by Fain, target of Shadow</td>
+                            <td>Victim/Antagonist, Fain's dagger infects Mat</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Antagonist (target of Moiraine's quest)</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>Elyas Machera</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>Protégé/Mentor, Elyas explains Wolfbrother abilities</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="places" class="content-section">
@@ -560,62 +601,64 @@
                 </div>
             </div>
             <h3 class="mt-8">Table 4: Key Locations and Their Significance in The Eye of the World</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Location Name</th>
-                        <th>Appearance/Description</th>
-                        <th>Primary Significance in The Eye of the World</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Emond's Field</td>
-                        <td>Peaceful, rural farming village; home of protagonists.</td>
-                        <td>Initial target of Shadow's attack, forces protagonists to leave their sheltered lives.</td>
-                    </tr>
-                    <tr>
-                        <td>Baerlon</td>
-                        <td>Walled, moderately large town.</td>
-                        <td>Temporary refuge, introduces Min and Padan Fain, first Myrddraal pursuit.</td>
-                    </tr>
-                    <tr>
-                        <td>Shadar Logoth</td>
-                        <td>Ruined, cursed city with deadly mist (Mashadar).</td>
-                        <td>Group separation, Mat's infection by the cursed dagger, a unique evil antithetical to the Dark One.</td>
-                    </tr>
-                    <tr>
-                        <td>Whitebridge</td>
-                        <td>Town with a prominent bridge.</td>
-                        <td>Site of Thom Merrilin's apparent sacrifice to save Rand and Mat.</td>
-                    </tr>
-                    <tr>
-                        <td>Caemlyn</td>
-                        <td>Regal capital city of Andor.</td>
-                        <td>Group reunion, Rand meets Loial, Elayne, Queen Morgase, and Elaida's Foretelling.</td>
-                    </tr>
-                    <tr>
-                        <td>The Ways</td>
-                        <td>Dark, rotting magical shortcut, once beautiful.</td>
-                        <td>Perilous rapid travel, infested with Trollocs and Machin Shin, demonstrates pervasive Shadow corruption.</td>
-                    </tr>
-                    <tr>
-                        <td>Fal Dara</td>
-                        <td>Borderland city.</td>
-                        <td>Temporary sanctuary and staging point before entering the Great Blight.</td>
-                    </tr>
-                    <tr>
-                        <td>The Great Blight</td>
-                        <td>Twisted, corrupted wilderness filled with Shadowspawn.</td>
-                        <td>Land corrupted by the Dark One's influence, final treacherous obstacle before the Eye.</td>
-                    </tr>
-                    <tr>
-                        <td>The Eye of the World</td>
-                        <td>Beautiful garden, pool of untainted saidin.</td>
-                        <td>Climax of the book, site of Rand's channeling, revelation of the Dragon Reborn, contains key artifacts.</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Location Name</th>
+                            <th>Appearance/Description</th>
+                            <th>Primary Significance in The Eye of the World</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Emond's Field</td>
+                            <td>Peaceful, rural farming village; home of protagonists.</td>
+                            <td>Initial target of Shadow's attack, forces protagonists to leave their sheltered lives.</td>
+                        </tr>
+                        <tr>
+                            <td>Baerlon</td>
+                            <td>Walled, moderately large town.</td>
+                            <td>Temporary refuge, introduces Min and Padan Fain, first Myrddraal pursuit.</td>
+                        </tr>
+                        <tr>
+                            <td>Shadar Logoth</td>
+                            <td>Ruined, cursed city with deadly mist (Mashadar).</td>
+                            <td>Group separation, Mat's infection by the cursed dagger, a unique evil antithetical to the Dark One.</td>
+                        </tr>
+                        <tr>
+                            <td>Whitebridge</td>
+                            <td>Town with a prominent bridge.</td>
+                            <td>Site of Thom Merrilin's apparent sacrifice to save Rand and Mat.</td>
+                        </tr>
+                        <tr>
+                            <td>Caemlyn</td>
+                            <td>Regal capital city of Andor.</td>
+                            <td>Group reunion, Rand meets Loial, Elayne, Queen Morgase, and Elaida's Foretelling.</td>
+                        </tr>
+                        <tr>
+                            <td>The Ways</td>
+                            <td>Dark, rotting magical shortcut, once beautiful.</td>
+                            <td>Perilous rapid travel, infested with Trollocs and Machin Shin, demonstrates pervasive Shadow corruption.</td>
+                        </tr>
+                        <tr>
+                            <td>Fal Dara</td>
+                            <td>Borderland city.</td>
+                            <td>Temporary sanctuary and staging point before entering the Great Blight.</td>
+                        </tr>
+                        <tr>
+                            <td>The Great Blight</td>
+                            <td>Twisted, corrupted wilderness filled with Shadowspawn.</td>
+                            <td>Land corrupted by the Dark One's influence, final treacherous obstacle before the Eye.</td>
+                        </tr>
+                        <tr>
+                            <td>The Eye of the World</td>
+                            <td>Beautiful garden, pool of untainted saidin.</td>
+                            <td>Climax of the book, site of Rand's channeling, revelation of the Dragon Reborn, contains key artifacts.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div id="prophecies" class="content-section prose max-w-none">
@@ -710,7 +753,7 @@
                 role: "Prankster, friend of Rand",
                 appearance: "Mat is described as wiry and long-limbed, with dark hair and dark eyes that often seem to hold a hint of amusement. He is frequently portrayed as roguishly handsome with a charming smile.",
                 personality_struggles: "A mischievous prankster from childhood, Mat is always seeking fun and adventure, possessing a natural charm with women. While some perceive him as untrustworthy due to his antics, he demonstrates fierce loyalty to his friends and always keeps his word. His carefree nature is severely tested by the perils of their journey, particularly after he acquires a cursed dagger. The dagger's influence causes him to become increasingly paranoid and suffer from partial amnesia, embodying a \"fool\" archetype. Despite his reluctance to be seen as a hero, he is inherently good and often acts heroically while downplaying his actions.",
-                key_actions: "In the ruined city of Shadar Logoth, Mat, against explicit warnings, takes a ruby-hilted dagger from a pile of treasure. This act infects him with the city's malevolent evil, Mashadar, leading to his deteriorating mental and physical health. He travels with Rand and Thom after the group's separation. His worsening condition from the dagger forces Moiraine to conclude that he must travel to Tar Valon for healing.",
+                key_actions: "In the ruined city of Shadar Logoth, Mat, against explicit warnings, takes a ruby-hilted dagger from a pile of treasure. This act infects him with the city's malevolent evil, Mashadar, leading to his deteriorating mental and physical health. He travels with Rand and Thom after the group's separation. His worsening condition from the dagger forces Moiraine to conclude(that he must travel to Tar Valon for healing.",
                 relationships: [
                     "Rand & Perrin (Best Friends): Mat shares a deep bond of friendship with Rand and Perrin, his companions from Emond's Field.",
                     "Min (Friend): His relationship with Min later develops into a strong and loyal friendship."
