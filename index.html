@@ -1,1452 +1,865 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>The Great Hunt - Interactive Companion</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <!-- Visualization & Content Choices:
-        - Report Info: Overall book themes/plot. Goal: Inform/Orient. Viz/Method: Text blocks, now consolidated into larger, continuous narrative sections within collapsibles. Interaction: Click to expand/collapse. Justification: Provides comprehensive, flowing plot summary while maintaining readability. Library: HTML/CSS/JS.
-        - Report Info: Character descriptions/arcs. Goal: Inform/Compare. Viz/Method: Character cards in a grid. Interaction: Click card for detailed modal/expanded view. Justification: Easy comparison and deep dive. Library: HTML/CSS/JS.
-        - Report Info: Places/Cultures. Goal: Inform/Explore. Viz/Method: Descriptive sections with clickable elements for more details. Interaction: Click to reveal. Justification: Layered information access. Library: HTML/CSS/JS.
-        - Report Info: Prophecies. Goal: Inform/Analyze. Viz/Method: List of prophecies with explanations. Interaction: Hover/click for context. Justification: Focus on key thematic elements. Library: HTML/CSS/JS.
-        - Report Info: Section lengths in the source report (Plot, Characters, World, Prophecies). Goal: Illustrate report's content distribution. Viz/Method: Chart.js Bar Chart. Interaction: Tooltips on hover. Justification: Fulfills Chart.js requirement with relevant metadata about the source. Library: HTML/CSS/JS.
-        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-        <style>
-            body {
-                font-family: "Inter", sans-serif;
-            }
-            .nav-button {
-                padding: 0.5rem 1rem;
-                border-radius: 0.375rem;
-                transition: background-color 0.3s ease;
-            }
-            .nav-button.active {
-                background-color: #0284c7; /* sky-600 */
-                color: white;
-            }
-            .nav-button:not(.active):hover {
-                background-color: #e0f2fe; /* sky-100 */
-            }
-            .content-section {
-                display: none;
-            }
-            .content-section.active {
-                display: block;
-            }
-            .collapsible-header {
-                cursor: pointer;
-            }
-            .collapsible-content {
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.5s ease-out;
-            }
-            .character-card {
-                cursor: pointer;
-                transition:
-                    transform 0.2s ease-in-out,
-                    box-shadow 0.2s ease-in-out;
-            }
-            .character-card:hover {
-                transform: translateY(-5px);
-                box-shadow:
-                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            }
-            .modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                display: none;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            }
-            .modal-content {
-                background-color: white;
-                padding: 2rem;
-                border-radius: 0.5rem;
-                width: 90%;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow-y: auto;
-            }
-            .chart-container {
-                position: relative;
-                width: 100%;
-                max-width: 600px; /* max-w-2xl equivalent */
-                margin-left: auto;
-                margin-right: auto;
-                height: 300px; /* Base height */
-                max-height: 400px;
-            }
-            @media (min-width: 768px) {
-                /* md breakpoint */
-                .chart-container {
-                    height: 350px;
-                }
-            }
-            h2 {
-                font-size: 1.75rem;
-                font-weight: 600;
-                margin-bottom: 1rem;
-                color: #7f1d1d;
-            } /* text-red-800 */
-            h3 {
-                font-size: 1.25rem;
-                font-weight: 600;
-                margin-top: 1rem;
-                margin-bottom: 0.5rem;
-                color: #991b1b;
-            } /* text-red-700 */
-            p {
-                margin-bottom: 0.75rem;
-                line-height: 1.6;
-            }
-            ul {
-                list-style-type: disc;
-                margin-left: 1.5rem;
-                margin-bottom: 0.75rem;
-            }
-            strong {
-                font-weight: 600;
-            }
-        </style>
-    </head>
-    <body class="bg-amber-50 text-neutral-800">
-        <header class="bg-white shadow-md sticky top-0 z-50">
-            <div
-                class="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center"
-            >
-                <h1 class="text-2xl font-bold text-red-800 mb-2 sm:mb-0">
-                    Exploring The Great Hunt
-                </h1>
-                <nav
-                    id="mainNav"
-                    class="flex flex-wrap justify-center space-x-1 sm:space-x-2"
-                >
-                    <button data-target="overview" class="nav-button active">
-                        Overview
-                    </button>
-                    <button data-target="story" class="nav-button">
-                        The Story
-                    </button>
-                    <button data-target="characters" class="nav-button">
-                        Characters
-                    </button>
-                    <button data-target="world" class="nav-button">
-                        World & Factions
-                    </button>
-                    <button data-target="prophecies" class="nav-button">
-                        Prophecies
-                    </button>
-                </nav>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Time: Book vs. Show Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Visualization & Content Choices:
+        - Report Info: Introduction -> Goal: Orient user -> Viz/Presentation: Static text -> Interaction: None -> Justification: Standard intro -> Library/Method: HTML.
+        - Report Info: Book Summaries/Season Recaps -> Goal: Provide context -> Viz/Presentation: Text blocks -> Interaction: Switched by book nav -> Justification: Clear plot presentation -> Library/Method: HTML, JS.
+        - Report Info: Major Differences (detailed) -> Goal: Compare specifics -> Viz/Presentation: Accordion list -> Interaction: Expand/collapse, switched by book nav -> Justification: Manages dense text, user-controlled detail -> Library/Method: HTML, JS.
+        - Report Info: Key Divergences Tables -> Goal: Quick summary -> Viz/Presentation: HTML tables -> Interaction: Switched by book nav -> Justification: Effective summary format -> Library/Method: HTML, JS.
+        - Report Info: Conclusion -> Goal: Guide for Book 6 -> Viz/Presentation: Structured text -> Interaction: Switched by nav -> Justification: Direct advice -> Library/Method: HTML, JS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visual structure is HTML/Tailwind.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .accordion-content { display: none; }
+        .accordion-button.active .accordion-icon-open { display: inline; }
+        .accordion-button.active .accordion-icon-closed { display: none; }
+        .accordion-icon-open { display: none; }
+        .table-cell {
+            border: 1px solid #FDE68A; /* amber-200 */
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .table-header {
+            background-color: #FBBF24; /* amber-500 */
+            color: #422006; /* stone-900 */
+            font-weight: bold;
+        }
+        /* Scrollbar styling for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7; /* amber-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D97706; /* amber-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B45309; /* amber-700 */
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-stone-800 min-h-screen अंतर्निहित">
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-amber-700">Bridging the Gap: The Wheel of Time</h1>
+            <p class="text-xl text-stone-600 mt-2">Your Guide to Books 1-5 After Watching Seasons 1-3</p>
         </header>
 
-        <main class="container mx-auto p-4 sm:p-6 md:p-8">
-            <section id="overview" class="content-section active">
-                <h2>Welcome to The Great Hunt</h2>
-                <p>
-                    *The Great Hunt*, published in 1990, is the second volume in
-                    Robert Jordan's monumental *Wheel of Time* series, following
-                    *The Eye of the World*. It significantly expands the
-                    narrative scope, thematic depth, and world-building
-                    introduced in the first book, thrusting its young, reluctant
-                    heroes deeper into a sprawling world teetering on the brink
-                    of a prophesied Last Battle against the Dark One. The novel
-                    is characterized by its accelerating pace, the introduction
-                    of new cultures and formidable adversaries (most notably the
-                    Seanchan), and the increasing fulfillment of ancient
-                    prophecies, particularly those concerning the Dragon Reborn.
-                    This application aims to make the rich details of the
-                    book—its intricate plot, key character developments, the
-                    expansion of its fantastical world, and the crucial role of
-                    prophecy in shaping its events—easily consumable and
-                    explorable.
-                </p>
+        <nav class="mb-8 flex flex-wrap justify-center gap-2">
+            <button data-target="intro" class="nav-button bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Introduction</button>
+            <button data-target="book1" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Book 1: The Eye of the World</button>
+            <button data-target="book2" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Book 2: The Great Hunt</button>
+            <button data-target="book3" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Book 3: The Dragon Reborn</button>
+            <button data-target="book4" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Book 4: The Shadow Rising</button>
+            <button data-target="book5" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Book 5: The Fires of Heaven</button>
+            <button data-target="conclusion" class="nav-button bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Preparing for Book 6</button>
+        </nav>
 
-                <h3>Focus of the Source Report</h3>
-                <p>
-                    The following chart illustrates the relative coverage of
-                    different aspects of *The Great Hunt* within the source
-                    literary analysis used to build this companion. This gives
-                    an idea of the depth of information available for each theme
-                    in the original report.
-                </p>
-                <div class="chart-container bg-white p-4 rounded-lg shadow">
-                    <canvas id="reportFocusChart"></canvas>
-                </div>
-                <p class="mt-4 text-sm text-gray-600 text-center">
-                    Chart data represents approximate paragraph/entry counts
-                    from the source literary analysis.
-                </p>
-            </section>
-
-            <section id="story" class="content-section">
-                <h2>The Narrative Tapestry: The Complete Story</h2>
-                <p>
-                    This section provides a comprehensive summary of all key
-                    plot events and developments in *The Great Hunt*, organized
-                    into distinct subsections for clarity. Click on each section
-                    to unfold the narrative.
-                </p>
-
-                <div class="space-y-4">
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            A. Echoes of the Eye: Fal Dara and the Stolen Horn
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                The narrative commences in Fal Dara, a northern
-                                fortress city in Shienar, immediately following
-                                the climactic events of *The Eye of the World*.
-                                Here, Rand al'Thor, still grappling with his
-                                emerging abilities, receives sword training from
-                                Lan Mandragoran, Moiraine's stoic Warder.
-                                Concurrently, Mat Cauthon's condition worsens, a
-                                grim consequence of his psychic attachment to
-                                the parasitic dagger he acquired from the cursed
-                                city of Shadar Logoth. This deepening affliction
-                                is not merely a personal ailment; it serves as a
-                                potent symbol of the Shadow's insidious and
-                                lingering corruption. The dagger's parasitic
-                                nature and Padan Fain's later binding with the
-                                malignant entity Mordeth emphasize that the
-                                Shadow's influence extends beyond overt attacks
-                                by Trollocs and Myrddraal, capable of corrupting
-                                from within and affecting the very souls of
-                                individuals. Padan Fain, the sinister Darkfriend
-                                and peddler, remains imprisoned within the
-                                fortress, a constant, unsettling presence.
-                            </p>
-
-                            <p>
-                                A momentous arrival shakes the fortress: Siuan
-                                Sanche, the Amyrlin Seat and leader of the Aes
-                                Sedai, descends upon Fal Dara. Her purpose is
-                                clear: she formally identifies Rand al'Thor as
-                                the Dragon Reborn, the prophesied figure
-                                destined to confront the Dark One. Private
-                                conversations between Siuan and Moiraine reveal
-                                a long-standing friendship and a secret,
-                                intricate plan concerning Rand's destiny. The
-                                Amyrlin's direct confirmation of Rand as the
-                                Dragon Reborn is a declarative statement of his
-                                inescapable fate.
-                            </p>
-
-                            <p>
-                                However, peace is short-lived. A Trolloc and
-                                Myrddraal attack breaches the fortress, a
-                                shocking display of the Shadow's reach. Amidst
-                                the chaos, Padan Fain is freed by Darkforces,
-                                and in a brazen act of defiance, he steals the
-                                legendary Horn of Valere—an artifact capable of
-                                summoning dead heroes—along with Mat's tainted
-                                dagger. This audacious theft acts as the primary
-                                catalyst, compelling Rand and his companions
-                                into a proactive "hunt" rather than allowing
-                                Rand to continue his desperate attempts to
-                                escape his destiny. A chilling message, scrawled
-                                in blood on the dungeon walls, is left for Rand:
-                                the Dark Lord is not dead and awaits him on
-                                Toman Head. This explicitly links these initial
-                                events to the book's ultimate destination,
-                                establishing a clear, almost predetermined
-                                narrative trajectory for Rand, highlighting the
-                                theme of destiny's inescapable grip.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            B. Divergent Paths: The Hunt for the Horn and the
-                            Call to the Tower
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                With the Horn and dagger stolen, the main
-                                characters diverge. Rand, accompanied by Perrin
-                                Aybara, Mat Cauthon, the Ogier Loial, and the
-                                unique "sniffer" Hurin, joins a Shienaran party
-                                led by Lord Ingtar Shinowa. Their mission is to
-                                pursue Fain and retrieve the stolen artifacts,
-                                heading southbound. Hurin's extraordinary
-                                ability to "smell" past violence, literally
-                                tracking the lingering scent of past evil,
-                                proves invaluable in tracking the Darkfriends.
-                                Perrin, meanwhile, secretly employs his
-                                burgeoning wolfbrother ability, communicating
-                                telepathically with wolves to aid in the
-                                tracking. This power is not merely a convenient
-                                plot device; it foreshadows a central internal
-                                conflict for Perrin throughout the series: his
-                                struggle to reconcile his human identity with
-                                his growing connection to wolves and the wild.
-                                His initial reluctance and mistrust of this
-                                power, even as it proves useful, hints at the
-                                challenges he will face in balancing his dual
-                                nature, making his personal journey distinct and
-                                compelling.
-                            </p>
-
-                            <p>
-                                Concurrently, the Amyrlin Seat departs for Tar
-                                Valon, taking Nynaeve al'Meara and Egwene
-                                al'Vere with her for formal Aes Sedai training
-                                at the White Tower. This immediate bifurcation
-                                of the main characters into two distinct
-                                plotlines—Rand's physical hunt and the women's
-                                magical training—is a crucial structural
-                                decision by Robert Jordan, allowing for a
-                                significant expansion of the world, developing
-                                different geographical regions and societal
-                                facets simultaneously. Moiraine Damodred, ever
-                                the enigmatic strategist, breaks off from the
-                                group unbidden, embarking on her own quest for
-                                answers. In Tar Valon, Nynaeve and Egwene
-                                quickly befriend Elayne Trakand, the
-                                Daughter-Heir of Andor, and the clairvoyant Min
-                                Farshaw. Nynaeve, known for her fierce temper
-                                and powerful channeling, successfully passes the
-                                rigorous test to become Accepted, a rank in the
-                                White Tower below Aes Sedai and above Novice.
-                                This test involves facing a series of visions,
-                                including one of her marrying Lan, which she
-                                must ignore to succeed. This period of training
-                                and the challenges faced by the women enable
-                                deeper, more focused character development for
-                                each group, emphasizing that the "Great Hunt" is
-                                not merely a chase for a physical object, but
-                                also a profound journey of self-discovery,
-                                mastery of emerging powers, and understanding
-                                their individual roles in the unfolding Pattern.
-                                This separation then sets the stage for a more
-                                impactful convergence in the climax.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            C. Through the Looking Glass: The Alternate World
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                During their pursuit of Fain, Rand, Loial, and
-                                Hurin experience a bizarre and unsettling event.
-                                They fall asleep near a mysterious stone, only
-                                to wake up separated from Ingtar's party and
-                                transported to an alternative world. This "if
-                                world" is a distorted, deserted reflection of
-                                their own, where the very landscape seems
-                                warped. Rand suspects he unconsciously channeled
-                                *saidin*, the male half of the One Power, to
-                                activate the Portal Stone.
-                            </p>
-
-                            <p>
-                                Portal Stones are ancient *ter'angreal*
-                                (power-wrought items) predating the Age of
-                                Legends, capable of facilitating transportation
-                                between other Portal Stones in their own world
-                                and even across various "if worlds" or "worlds
-                                that might be". These stones bear cryptic
-                                symbols representing different realities. The
-                                accidental journey through this Portal Stone has
-                                a profound effect: while only hours pass for the
-                                travelers, four months elapse in their original
-                                world, and they experience disturbing visions of
-                                possible futures. This particular "if world" is
-                                revealed to be one where the legendary Artur
-                                Hawkwing lost a critical battle against the
-                                Shadow, leading to humanity's annihilation and
-                                the Shadow's creatures turning upon themselves.
-                                The introduction of Portal Stones and the "if
-                                worlds" represents a monumental expansion of the
-                                *Wheel of Time*'s cosmology, moving beyond a
-                                single reality to encompass a multiverse where
-                                "From Stone to Stone run the lines of 'if,'
-                                between the worlds that might be". This concept
-                                not only adds a layer of cosmic grandeur but
-                                also introduces profound philosophical questions
-                                about determinism versus free will. The visions
-                                of "possible futures" experienced during the
-                                extended Portal Stone journey reinforce the idea
-                                of a predetermined yet mutable "Pattern" that
-                                weaves all lives, challenging the characters and
-                                readers to consider the consequences of choices
-                                across countless realities.
-                            </p>
-
-                            <p>
-                                In this eerie, desolate reality, Rand encounters
-                                a beautiful, enigmatic woman named Selene. She
-                                is fighting off a strange creature called a
-                                *grolm*. Selene claims to be from Cairhien and
-                                appears to be of noble or even royal lineage.
-                                She helps Rand and his companions find another
-                                Portal Stone, guiding them back to their own
-                                world. However, her true identity is far more
-                                sinister: she is later revealed to be Lanfear,
-                                one of the most powerful of the Forsaken,
-                                ancient servants of the Dark One who were
-                                imprisoned for millennia. Lanfear had been in
-                                love with Lews Therin Telamon, Rand's previous
-                                incarnation, and attempts to subtly influence
-                                him. Selene's appearance and her later
-                                revelation as Lanfear are a critical plot twist
-                                and a significant character introduction. Her
-                                seemingly helpful demeanor and claims of royalty
-                                are a calculated deception. Her true identity as
-                                a powerful Forsaken who was intimately connected
-                                to Lews Therin immediately establishes a deep,
-                                personal, and psychological threat to Rand.
-                                Lanfear's attempts to compel or subtly influence
-                                Rand highlight the insidious nature of the
-                                Forsaken's methods, which extend beyond brute
-                                force to manipulation and temptation,
-                                foreshadowing the complex psychological warfare
-                                Rand will face throughout the series.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            D. Intrigue and Betrayal in Cairhien
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                Rand's party, now reunited with Loial and Hurin,
-                                journeys to Cairhien, a nation renowned for its
-                                intricate political "Game of Houses". Here, Rand
-                                has an unexpected and welcome reunion with Thom
-                                Merrilin, the gleeman he believed dead after the
-                                events of *The Eye of the World*. However, the
-                                respite is brief. Rand and Loial are attacked by
-                                Trollocs, and during their escape, the Horn of
-                                Valere and Mat's dagger are stolen once more.
-                                The repeated theft of the Horn and dagger and
-                                the tragic murder of Dena are crucial plot
-                                points that underscore the escalating stakes and
-                                the relentless, personal nature of the Shadow's
-                                pursuit. The personal cost of Rand's presence is
-                                tragically underscored when Thom's apprentice,
-                                Dena, is murdered for Thom's association with
-                                Rand. This highlights the pervasive reach of the
-                                Darkfriend network and, more significantly, the
-                                growing malevolence and independent agenda of
-                                Padan Fain. Fain's transformation into an entity
-                                hostile to both Light and Shadow makes him a
-                                unique and unpredictable force, adding a new
-                                layer of complexity to the overall conflict. His
-                                personal obsession with Rand ensures that the
-                                pursuit is not merely strategic but deeply
-                                personal and vindictive.
-                            </p>
-
-                            <p>
-                                Ingtar's group, having continued their pursuit,
-                                arrives in Cairhien and reunites with Rand's
-                                party. Hurin's unique tracking ability allows
-                                them to trace the Darkfriends to Barthanes
-                                Damodred's manor. Using a now-valuable
-                                invitation from Barthanes, the trail is followed
-                                further to a Waygate on the premises. However,
-                                their attempt to use the Waygate is thwarted by
-                                the presence of Machin Shin, the malevolent
-                                "Black Wind" that corrupts the Ways. The
-                                encounter with Machin Shin in the Ways is a
-                                significant world-building detail, vividly
-                                illustrating the pervasive corruption of the
-                                Ways, which were once safe travel networks
-                                created by the Ogier. This reinforces the idea
-                                that the Shadow's influence is not confined to
-                                specific creatures or individuals but can taint
-                                even ancient, powerful constructs. This forced
-                                reliance on other, riskier travel methods like
-                                Portal Stones further emphasizes the world's
-                                broken state and the increasing peril faced by
-                                the protagonists. Through Barthanes, Padan Fain
-                                sends a defiant message: he is taking the Horn
-                                to the port city of Falme, on Toman Head.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            E. The Seanchan Invasion: Falme Under Siege
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                The narrative shifts to Falme, a port city on
-                                Toman Head, now under the brutal occupation of
-                                the invading Seanchan Empire and their exotic
-                                beasts. Simultaneously, Geofram Bornhald, leader
-                                of the zealous Children of the Light
-                                (Whitecloaks), prepares his forces to attack the
-                                Seanchan, creating a dangerous three-way
-                                conflict. The Seanchan invasion is a pivotal
-                                development, introducing a formidable new
-                                antagonist with a distinct and horrifying
-                                culture.
-                            </p>
-
-                            <p>
-                                In Tar Valon, the treacherous Aes Sedai Liandrin
-                                Guirale, secretly a Darkfriend and member of the
-                                Black Ajah, lures Egwene, Nynaeve, Elayne, and
-                                Min to Toman Head. She deceives them by claiming
-                                Rand is in trouble, then cruelly betrays them,
-                                handing them over to the Seanchan High Lady
-                                Suroth to be enslaved. Liandrin's explicit
-                                betrayal is a major plot twist, providing
-                                concrete evidence of the Black Ajah's existence
-                                within the White Tower, confirming a long-feared
-                                rumor and exposing a significant internal threat
-                                to the forces of Light. This revelation shatters
-                                trust among supposed allies and complicates the
-                                fight against the Shadow, demonstrating that the
-                                enemy is not solely external but deeply
-                                insidious and pervasive, forcing the
-                                protagonists to question whom they can truly
-                                rely on.
-                            </p>
-
-                            <p>
-                                Egwene suffers the most horrifying fate: she is
-                                collared with an *a'dam*, a terrifying device
-                                used by the Seanchan to control channelers,
-                                while Min is held hostage. The *a'dam* is a
-                                collar linked by a literal leash to a bracelet
-                                worn by a *sul'dam* ("Leash Holder"). This
-                                device grants the *sul'dam* total control over
-                                the *damane* ("Leashed One"), enabling them to
-                                compel channeling and inflict excruciating pain
-                                for disobedience. This horrifying practice is
-                                central to Seanchan society and their military
-                                might, as they view *damane* as "weaponized
-                                channelers" or "guns". What is secretly known
-                                only to a few Seanchan is that *sul'dam*
-                                themselves are women who can learn to channel,
-                                yet they are trained to believe they cannot,
-                                reinforcing the societal structure. Egwene's
-                                traumatic experience as a *damane* is a
-                                powerful, personal illustration of this cultural
-                                clash, serving as a crucible for her character
-                                development and shaping her future views on
-                                power and freedom.
-                            </p>
-
-                            <p>
-                                Despite the overwhelming odds, Nynaeve and
-                                Elayne manage to escape capture. Driven by
-                                fierce loyalty, they embark on a desperate
-                                rescue mission, eventually succeeding in freeing
-                                Egwene from her torment.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            F. The Climax at Falme: Battle, Prophecy, and
-                            Proclamation
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                The various narrative threads converge
-                                dramatically in Falme. Rand's group, the
-                                Seanchan forces, and the Whitecloaks clash in a
-                                chaotic, multi-sided battle. During the
-                                fighting, Lord Ingtar Shinowa makes a shocking
-                                confession: he reveals himself to be a
-                                Darkfriend, having sworn allegiance to the
-                                Shadow out of despair for his people. However,
-                                in a final act of redemption, he sacrifices
-                                himself fighting bravely against the Seanchan.
-                                Ingtar's revelation as a Darkfriend and his
-                                subsequent heroic death introduces a significant
-                                moral complexity to the narrative. It challenges
-                                the simplistic binary of good versus evil,
-                                demonstrating that individuals can be driven to
-                                the Shadow by despair or perceived necessity,
-                                and that even those who have fallen can find a
-                                path to redemption through sacrifice. This adds
-                                profound nuance to the Light vs. Shadow
-                                conflict, suggesting that the struggle is not
-                                just external but also internal, and that hope
-                                for redemption exists even in the darkest
-                                corners.
-                            </p>
-
-                            <p>
-                                Rand confronts High Lord Turak, the Seanchan
-                                commander, in single combat. Rand ultimately
-                                slays Turak, successfully retrieving the Horn of
-                                Valere and Mat's dagger. Trapped between the
-                                advancing Seanchan and Whitecloak lines, Mat
-                                Cauthon, despite his illness, makes a fateful
-                                decision: he blows the Horn of Valere. The
-                                Horn's call summons legendary heroes from the
-                                dead, including the mythical Artur Hawkwing, who
-                                ride to battle against the Seanchan, turning the
-                                tide of the conflict. The banner of the Dragon
-                                Reborn is unfurled, a powerful symbol of Rand's
-                                emerging destiny.
-                            </p>
-
-                            <p>
-                                In the midst of the chaos, Ba'alzamon, the
-                                figure Rand has encountered in his dreams,
-                                appears. He and Rand engage in a climactic duel,
-                                which is magically projected into the air above
-                                Falme for all to witness. Rand allows himself to
-                                be stabbed by Ba'alzamon's staff, creating an
-                                opening to plunge his heron-mark sword through
-                                Ba'alzamon's heart. Rand's climactic duel with
-                                Ba'alzamon is a pivotal moment that showcases
-                                Rand's rapidly growing power and his direct
-                                confrontation with the supposed embodiment of
-                                the Dark One. While later books clarify that
-                                Ba'alzamon is actually Ishamael, one of the
-                                Forsaken, his portrayal in *The Great Hunt* as
-                                the "Dark Lord" in Rand's dreams and his
-                                physical manifestation at Falme serve to
-                                establish him as the primary antagonist of this
-                                early stage. The projection of their fight
-                                across the sky is a symbolic proclamation of
-                                Rand's power to the world, even if he does not
-                                fully grasp the implications or the true
-                                identity of his foe at this point. This
-                                deception highlights the cunning nature of the
-                                Shadow.
-                            </p>
-
-                            <p>
-                                With the battle over and the Seanchan forces
-                                defeated (for now), Rand is found by Min. As he
-                                recuperates, Selene appears, touches the
-                                sleeping Rand, and definitively reveals her true
-                                identity as the Forsaken Lanfear before
-                                vanishing. When Rand awakens, he finds Ingtar's
-                                surviving army gathered under the Dragon's
-                                banner, offering their pledge of allegiance to
-                                him. This public display and the events of Falme
-                                force Rand to finally admit and accept his
-                                destiny as the Dragon Reborn. The battle at
-                                Falme directly fulfills the prophecy: "Five ride
-                                forth, and four return. Above the watchers shall
-                                he proclaim himself, bannered cross the sky in
-                                fire...". This is the undeniable climax of *The
-                                Great Hunt*, serving as the dramatic convergence
-                                point for all major plotlines and characters,
-                                forcing Rand to confront his destiny head-on.
-                                This public manifestation of Rand's identity as
-                                the Dragon Reborn is a powerful narrative beat,
-                                solidifying his unwilling acceptance of his role
-                                and marking a definitive, irreversible turning
-                                point for his character and the series. It
-                                underscores the idea that the Pattern is
-                                weaving, and Rand's destiny is unfolding in
-                                plain sight.
-                            </p>
-                        </div>
-                    </div>
+        <main id="main-content" class="bg-white p-6 rounded-xl shadow-xl">
+            <section id="intro" class="content-section active">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">I. Introduction: Navigating the Pattern's Weave</h2>
+                <div class="space-y-4 text-stone-700 leading-relaxed">
+                    <p>This guide serves for viewers of Amazon's <em>The Wheel of Time</em> series transitioning into Robert Jordan's original novels, specifically preparing to begin with Book 6, <em>Lord of Chaos</em>. Having experienced the first three seasons of the television adaptation, individuals have witnessed a unique interpretation of this epic narrative. It is essential to understand that television adaptations, particularly of sprawling fantasy sagas, often necessitate significant changes due to format constraints, pacing requirements, budgetary considerations, and creative interpretations. The show has condensed, rearranged, and in some instances, fundamentally altered plot points, character arcs, and even core elements of the world's established order. This guide systematically outlines these divergences, providing context and analysis to prepare readers for the richness and intricacies of the original text.</p>
+                    <p>The show's creators have explicitly articulated their intention to streamline the story, and in doing so, have introduced notable metaphysical changes.[1] The adaptation is not merely a condensed version of the books; it represents a distinct interpretation that, while adhering to many major narrative beats, frequently employs different pathways to reach them.[2] This analysis approaches the television series as a unique "turning of the Wheel," allowing for a comparative examination rather than a strict judgment of its fidelity to the source material. This perspective helps in setting the expectation for the reader: they are not simply filling in narrative gaps but are preparing to immerse themselves in a story that, despite shared foundational elements, unfolds in a different form.</p>
+                    <p>Use the navigation buttons above to explore the differences for each book or jump to the conclusion on preparing for Book 6.</p>
                 </div>
             </section>
 
-            <section id="characters" class="content-section">
-                <h2>Key Characters</h2>
-                <p>
-                    Meet the key figures of *The Great Hunt*. Click on a
-                    character to learn about their role, relationships, and
-                    development in this crucial chapter of the Wheel of Time.
-                </p>
-                <div
-                    id="characterGrid"
-                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-                ></div>
-            </section>
+            <section id="book1" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">II. The Eye of the World (Book 1) vs. Season 1: Foundations and First Departures</h2>
+                <p class="mb-6 text-stone-600 italic">This section outlines the core plot of "The Eye of the World" and Season 1 of the TV series, followed by a detailed breakdown of their major differences and a summary table for quick reference.</p>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <article class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-amber-600 mb-3">Book 1 Summary: The Call to Adventure from Emond's Field</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p>Robert Jordan's <em>The Eye of the World</em> introduces readers to the tranquil, isolated village of Emond's Field in the Two Rivers. The narrative centers on Rand al'Thor, Mat Cauthon, and Perrin Aybara, young men leading seemingly ordinary lives as farmers and craftsmen.[3, 4] Their peaceful existence is abruptly shattered by a brutal attack from Trollocs, savage half-men, half-beasts, and a Fade (Myrddraal), creatures serving the malevolent Dark One.[3, 4] This invasion coincides with the arrival of Moiraine Damodred, a powerful Aes Sedai, and her formidable Warder, al'Lan Mandragoran. Moiraine is on a critical quest to locate the prophesied Dragon Reborn, an individual destined to confront the Dark One.[3, 4]</p>
+                            <p>To protect the village and draw the Shadow's attention away, Moiraine persuades Rand, Mat, Perrin, along with Egwene al'Vere and Nynaeve al'Meara, to flee their home.[3, 4] Their subsequent journey is fraught with peril, leading to separations and reunions, and gradually exposing them to a larger, unimaginably dangerous world. This world is steeped in ancient prophecies, the mysterious One Power, and the omnipresent threat of the Dark One, Ba'alzamon.[3, 4] The book meticulously establishes a richly detailed world, featuring diverse races, cultures, and histories, drawing inspiration from classic fantasy epics like <em>The Lord of the Rings</em> but infused with Robert Jordan's distinctive imaginative vision.[4] The narrative also begins with an epic prologue set in the Age of Legends, providing a glimpse into the world's deep past.[3]</p>
+                        </div>
+                    </article>
+                    <article class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Season 1 Recap: The Show's Inaugural Weave</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                           <p>Season 1 of Amazon's <em>The Wheel of Time</em> begins with Moiraine and Lan embarking on their quest to find the Dragon Reborn, a figure whose immense power could either save or destroy the world.[5] Their search leads them to Emond's Field, which is subsequently attacked by Trollocs. During the battle, Moiraine is injured while wielding the One Power.[5] To safeguard the villagers and divert the Trollocs, she and Lan take Egwene, Rand, Perrin, and Mat with them. Nynaeve, the village Wisdom, is initially captured by Trollocs but later escapes and reunites with the group, demonstrating formidable healing abilities.[5]</p>
+                           <p>The group later encounters Logain, a male channeler who claims to be the Dragon Reborn. He is captured by the Aes Sedai, who attempt to gentle him (sever his connection to the One Power). However, Logain temporarily breaks free, killing one Aes Sedai and injuring Lan before being subdued once more.[5] Moiraine, Lan, and Nynaeve eventually locate Egwene, Rand, Mat, and Perrin. Moiraine urges them to journey with her to the Eye of the World to confront the Dark One, but Mat chooses not to accompany them.[5] At the Eye of the World, Rand is revealed to be the Dragon Reborn, a truth Moiraine confirms by stating that others would perish if they entered with her.[5] Rand confronts the Dark One, who attempts to sway him with visions of a peaceful life with Egwene. Rand ultimately defeats the Dark One, but in the process, Moiraine's connection to the One Power is severed.[5] Fearing that his magic will drive him mad, Rand decides to go into hiding, leaving his friends to believe he has died.[1, 5]</p>
+                        </div>
+                    </article>
+                </div>
 
-            <section id="world" class="content-section">
-                <h2>The World and Its Factions</h2>
-                <p>
-                    Discover the diverse lands, cultures, and powerful groups
-                    that shape the world of *The Great Hunt*. From the fortress
-                    of Fal Dara to the invading Seanchan Empire, the stage for
-                    epic conflict is set. Click on the topics below for more
-                    details.
-                </p>
-
-                <div class="space-y-4">
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            Significant Places
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                <strong>Fal Dara:</strong> Located in Shienar,
-                                Fal Dara is the northernmost city in this
-                                nation. It serves as a military fortress,
-                                guarding against incursions from the Blight. The
-                                book opens here, establishing a sense of
-                                immediate danger and the constant vigilance
-                                required against the Shadow's forces. Its
-                                strategic importance as a frontier outpost is
-                                evident in the Trolloc attack that breaches its
-                                walls.
-                            </p>
-                            <p>
-                                <strong>Tar Valon:</strong> A major city-state
-                                and the seat of the Aes Sedai's White Tower, Tar
-                                Valon is a central hub of power, knowledge, and
-                                political intrigue. The White Tower itself is a
-                                towering structure, symbolizing the Aes Sedai's
-                                influence and their role as guardians of the One
-                                Power. It serves as the training ground for
-                                female channelers, where novices undergo
-                                rigorous instruction and tests to become
-                                Accepted and then full Aes Sedai. The city's
-                                bustling streets, filled with people from
-                                diverse lands, highlight its importance as a
-                                crossroads of cultures and information.
-                            </p>
-                            <p>
-                                <strong>Cairhien:</strong> A vast kingdom in the
-                                east-central Westlands, Cairhien is renowned for
-                                its intricate political system known as the
-                                "Game of Houses". This game of subtle
-                                maneuvering and social etiquette dictates much
-                                of Cairhienin noble society, where even minor
-                                gaffes can have significant consequences. The
-                                city itself is characterized by its dark and
-                                somber fashion. Rand's experiences here expose
-                                him to the complexities of high-level politics
-                                and the dangers of a society driven by status
-                                and hidden agendas.
-                            </p>
-                            <p>
-                                <strong>Falme:</strong> A strategic port city
-                                located on Toman Head, Falme becomes the focal
-                                point of the Seanchan invasion. Its occupation
-                                by the Seanchan marks a significant shift in the
-                                world's geopolitical landscape, introducing a
-                                new, terrifying imperial power to the Westlands.
-                                The city's strategic coastal location makes it
-                                ideal for a naval invasion.
-                            </p>
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Major Differences & Their Implications (Book 1 vs. Season 1):</h3>
+                <p class="mb-4 text-stone-600">The adaptation of <em>The Eye of the World</em> into Season 1 introduced several significant divergences. Understanding these is crucial for transitioning to the books. Click on each point to see details.</p>
+                <div class="space-y-3 mb-8">
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-t-lg">
+                            <span class="font-medium text-amber-700">The Dragon Reborn's Gender Prophecy and Moiraine's Search</span>
+                            <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> The ancient prophecy of the Karaethon Cycle explicitly states that the Dragon Reborn must be male. Moiraine's initial search was focused on identifying which of the three young men—Rand, Mat, or Perrin—was the prophesied figure.[6]</p>
+                            <p><strong>Show Depiction:</strong> The series altered this prophecy, introducing the possibility that the Dragon Reborn could be female, considering Egwene or Nynaeve alongside the male candidates.[1, 6, 7]</p>
+                            <p><strong>Implication:</strong> This modification fundamentally redefines the initial narrative tension. In the books, the mystery lies in *who* among the men is the Dragon, not *if* it is a man. The show's alteration expands the scope of potential Dragons. Furthermore, this change subtly implies a deeper alteration to the world's established order: that souls in *The Wheel of Time* do not possess an innate gender, potentially affecting the reincarnation of powerful channelers like the Forsaken.[6]</p>
                         </div>
                     </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            Magical Constructs & Travel
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                <strong>Portal Stones:</strong> These ancient
-                                *ter'angreal* are remnants from an age before
-                                the Age of Legends, designed to facilitate
-                                transportation between different locations
-                                within the same world and even across various
-                                "if worlds" or "worlds that might be". They are
-                                described as stone cylinders bearing cryptic
-                                symbols, each representing a different reality.
-                                The accidental activation of a Portal Stone by
-                                Rand transports him, Loial, and Hurin to a
-                                distorted parallel world, where time flows
-                                differently and humanity has been annihilated.
-                                The introduction of these artifacts profoundly
-                                expands the cosmology of the *Wheel of Time*,
-                                suggesting a multiverse where countless
-                                variations of reality exist. This concept
-                                introduces deep philosophical questions about
-                                determinism versus free will, as characters
-                                witness visions of possible futures during their
-                                journeys through these "if worlds".
-                            </p>
-                            <p>
-                                <strong>The Ways:</strong> Created by the Ogier
-                                after the Breaking of the World, the Ways are a
-                                series of paths through an alternate dimension,
-                                intended to connect Ogier communities and
-                                facilitate quick travel. Stone doorways called
-                                Waygates serve as entry points. However, the
-                                Ways have been corrupted by Machin Shin, the
-                                malevolent "Black Wind," which preys on
-                                travelers. This corruption renders the Ways
-                                largely unusable and dangerous, forcing
-                                protagonists to seek alternative, riskier travel
-                                methods like Portal Stones, thereby emphasizing
-                                the world's broken state and the pervasive reach
-                                of the Shadow's influence, which can taint even
-                                ancient, powerful constructs.
-                            </p>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Perrin's Backstory: The Introduction and Fate of Laila</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Perrin Aybara's profound aversion to violence is rooted in his inherent physical strength and his deep self-awareness of the potential harm he could inflict.[1] He does not have a wife at the beginning of the series.[8]</p>
+                            <p><strong>Show Depiction:</strong> Introduced a new character, Laila, Perrin's wife, who is accidentally killed by his hand during the Trolloc attack. This serves as the direct catalyst for his aversion to violence in the adaptation.[1, 8]</p>
+                            <p><strong>Implication:</strong> While providing immediate motivation, this change introduces a trope where a female character's death advances a male character's arc.[1] It simplifies a more nuanced, internal struggle present in the books, making Perrin's journey more externally driven.</p>
                         </div>
                     </div>
-
-                    <div class="collapsible bg-white p-4 rounded-lg shadow">
-                        <h3
-                            class="collapsible-header text-red-700 flex justify-between items-center"
-                        >
-                            Key Factions & Cultures
-                            <span
-                                class="arrow text-red-700 text-xl transform transition-transform duration-300"
-                                >▼</span
-                            >
-                        </h3>
-                        <div
-                            class="collapsible-content text-sm text-neutral-700"
-                        >
-                            <p>
-                                <strong>Seanchan Culture:</strong> The Seanchan
-                                are a vast and powerful empire from a continent
-                                across the Aryth Ocean, claiming descent from
-                                Artur Hawkwing's armies. Their culture is highly
-                                disciplined, based around rigid rank and
-                                conquest, with a unified government. A central
-                                and horrifying aspect of their society is the
-                                enslavement of women who can channel the One
-                                Power, known as *damane* ("Leashed Ones"). These
-                                *damane* are controlled by *sul'dam* ("Leash
-                                Holders") using an *a'dam*, a *ter'angreal*
-                                consisting of a collar and bracelet linked by a
-                                leash. *Sul'dam* are secretly women who can
-                                learn to channel, though they are taught they
-                                cannot, reinforcing the social hierarchy. The
-                                *damane* are treated as "weaponized channelers"
-                                or "guns" and are used extensively in their
-                                military campaigns. The Seanchan also employ
-                                exotic beasts like *raken* (large, dragon-like
-                                flying creatures used for transport) and *grolm*
-                                (three-eyed frog creatures). Their arrival
-                                introduces a profound cultural and ideological
-                                conflict, particularly concerning the use and
-                                treatment of the One Power, challenging the
-                                established norms of the Westlands.
-                            </p>
-                            <p>
-                                <strong>Aes Sedai & The White Tower:</strong>
-                                The dominant organization of female channelers
-                                based in Tar Valon. They wield immense
-                                political, social, and magical power across the
-                                Westlands. However, they face increasing
-                                internal threats (such as the clandestine Black
-                                Ajah, Aes Sedai secretly serving the Dark One)
-                                and external mistrust from the common people,
-                                who often fear their power, stemming from the
-                                Breaking of the World.
-                            </p>
-                            <p>
-                                <strong
-                                    >Children of the Light
-                                    (Whitecloaks):</strong
-                                >
-                                A quasi-religious, militarized order based in
-                                Amadicia, the Whitecloaks are fanatically
-                                devoted to destroying anyone who channels the
-                                One Power, believing them to be servants of the
-                                Shadow. They are a powerful independent military
-                                organization with a strong presence in the
-                                Westlands, often clashing with Aes Sedai and
-                                those associated with channeling. Their rigid
-                                ideology and distrust of magic contribute to the
-                                complex political landscape and often lead to
-                                conflicts with the protagonists, as seen in
-                                their confrontation with the Seanchan at Falme.
-                            </p>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Mat's Early Journey: His Separation and the Shadar Logoth Dagger</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Mat Cauthon travels with the main group to the Eye of the World and is involved in the hunt for the Horn of Valere in *The Great Hunt*.[1] He, Rand, and Perrin discover the ruby-hilted dagger in Shadar Logoth, tempted by Mordeth.[9]</p>
+                            <p><strong>Show Depiction:</strong> Due to an actor's departure, Mat was written out of final S1 episodes. It's implied he stays in Tar Valon to find the cursed dagger and is taken in by Liandrin.[1, 8] The show depicts Mat finding the dagger alone.[9]</p>
+                            <p><strong>Implication:</strong> Mat's early separation and altered trajectory create entirely new narrative pathways for him, necessitating a major re-sequencing of his book arc.[1, 8]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">The Caemlyn Detour vs. Direct Route to Tar Valon; Elayne's Introduction</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> The group reconvenes in Caemlyn, Andor's capital. Rand meets Elayne Trakand, the Daughter-Heir, and her family.[1, 9]</p>
+                            <p><strong>Show Depiction:</strong> Skips Caemlyn; characters converge on Tar Valon. Elayne is introduced later in Season 2 as a novice.[1, 9, 10, 11]</p>
+                            <p><strong>Implication:</strong> Omitting Caemlyn streamlines the narrative but sacrifices the organic introduction of key political figures and Andoran world-building.[9]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Moiraine's "Stilling" vs. Shielding</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Moiraine remains a consistently powerful channeler. Her bond with Lan is never severed.[8, 12]</p>
+                            <p><strong>Show Depiction:</strong> At S1 end, the Dark One severs Moiraine's connection to the One Power.[1, 5] Later clarified in S2 as shielding (blocked, not permanently removed).[10, 11]</p>
+                            <p><strong>Implication:</strong> This show-only plot point enhances Moiraine's personal struggle and vulnerability, creating new dramatic tension for her character and relationship with Lan.[2, 12, 10, 11]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Rand's Solo Departure at Season's End</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Rand travels with the group to Fal Dara at the end of *The Eye of the World*.[1]</p>
+                            <p><strong>Show Depiction:</strong> Rand goes off on his own after defeating the Dark One, fearing his magic will drive him mad, leaving friends to believe he died.[1, 5]</p>
+                            <p><strong>Implication:</strong> This early decision accelerates Rand's internal struggle with madness and provides a reason for his separation from the group at S2 start, setting up distinct character arcs.[5, 13]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Other Notable Character and Lore Changes</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Thom Merrilin:</strong> Role reduced in show; introduced early and travels extensively in book, "seeming death" later.[8] Reappears S3 show.[14]</p>
+                            <p><strong>Ta'veren:</strong> Only Rand, Mat, Perrin in books.[9] All five Emond's Fielders in show.[9]</p>
+                            <p><strong>Trollocs:</strong> Portrayed as "actual terrors" in show, sometimes less threatening in books.[15]</p>
+                            <p><strong>Moiraine/Siuan Relationship:</strong> Hints of a lesbian relationship in show, not present in books.[15, 16]</p>
+                            <p><strong>World-building:</strong> Some viewers note show's world-building is less detailed/more generic.[2, 3, 15]</p>
+                            <p><strong>Implication:</strong> These changes reflect intent to modernize, streamline introductions, heighten drama, and include contemporary adaptation choices.[1, 2, 15, 16]</p>
                         </div>
                     </div>
                 </div>
+
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Table: Book 1 vs. Season 1 Key Divergences</h3>
+                <div class="overflow-x-auto shadow-md rounded-lg">
+                    <table class="min-w-full bg-white border border-amber-300">
+                        <thead>
+                            <tr>
+                                <th class="table-cell table-header">Divergence Point</th>
+                                <th class="table-cell table-header">Book 1 Depiction</th>
+                                <th class="table-cell table-header">Season 1 Depiction</th>
+                                <th class="table-cell table-header">Implication for Reading Book 6+</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-stone-700">
+                            <tr>
+                                <td class="table-cell font-medium">Dragon Reborn Gender Prophecy</td>
+                                <td class="table-cell">Explicitly male</td>
+                                <td class="table-cell">Ambiguous (could be male or female)</td>
+                                <td class="table-cell">Expect the books to clearly state the Dragon Reborn is male; Moiraine's early search is less about *who* among the five, but *which* of the three men.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Perrin's Aversion to Violence</td>
+                                <td class="table-cell">Stems from innate strength and self-awareness</td>
+                                <td class="table-cell">Triggered by accidental killing of his wife, Laila (show-only character)</td>
+                                <td class="table-cell">Perrin's trauma in the books is more internal and philosophical, not tied to a specific, immediate death.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Mat's Early Journey</td>
+                                <td class="table-cell">Travels with main group to Eye of the World and Fal Dara; finds dagger with Rand/Perrin from Mordeth</td>
+                                <td class="table-cell">Separated from group at Tar Valon due to actor change; implied to be taken by Liandrin; finds dagger alone</td>
+                                <td class="table-cell">Mat's early book arc is significantly different, with him present for events he missed in the show. His character development unfolds differently.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Caemlyn Stop</td>
+                                <td class="table-cell">Major plot point where group reconvenes; Rand meets Elayne</td>
+                                <td class="table-cell">Skipped; characters converge directly on Tar Valon; Elayne introduced later in White Tower (S2)</td>
+                                <td class="table-cell">Expect a detailed stop in Caemlyn and an earlier, different introduction to Elayne and Andoran politics in Book 1.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Moiraine's One Power Status</td>
+                                <td class="table-cell">Consistently powerful Aes Sedai</td>
+                                <td class="table-cell">Severed/shielded from One Power by Dark One at season's end</td>
+                                <td class="table-cell">Moiraine retains her full power throughout the early books and does not experience this loss.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Rand's Season 1 Ending</td>
+                                <td class="table-cell">Travels with group to Fal Dara</td>
+                                <td class="table-cell">Goes into hiding, leaving friends to believe he died</td>
+                                <td class="table-cell">Rand remains with the group at the end of Book 1, not isolating himself.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Thom Merrilin's Role</td>
+                                <td class="table-cell">Introduced early, travels extensively with group, mentors Rand/Mat; "seeming death" later in book</td>
+                                <td class="table-cell">Introduced later, less colorful persona; "seeming death" earlier; reappears in S3</td>
+                                <td class="table-cell">Thom's presence and mentorship are more consistent and earlier in the books.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Ta'veren Status</td>
+                                <td class="table-cell">Only Rand, Mat, Perrin are *ta'veren*</td>
+                                <td class="table-cell">All five Emond's Fielders (Rand, Mat, Perrin, Egwene, Nynaeve) are *ta'veren*</td>
+                                <td class="table-cell">The books focus the Pattern-twisting influence primarily on the three male protagonists.</td>
+                            </tr>
+                             <tr>
+                                <td class="table-cell font-medium">Moiraine/Siuan Relationship</td>
+                                <td class="table-cell">Professional, no romantic/sexual undertones</td>
+                                <td class="table-cell">Hints at a past/present lesbian relationship</td>
+                                <td class="table-cell">This romantic dynamic is absent in the books.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
-            <section id="prophecies" class="content-section">
-                <h2>Prophecies and Their Significance</h2>
-                <p>
-                    Prophecy is a driving force in *The Great Hunt*, shaping
-                    destinies and foreshadowing the epic events to come. Explore
-                    the key prophecies and their interpretations as they unfold.
-                </p>
+            <section id="book2" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">III. The Great Hunt (Book 2) vs. Season 2: Expanding Horizons and Diverging Paths</h2>
+                <p class="mb-6 text-stone-600 italic">This section delves into "The Great Hunt" and Season 2, highlighting their narrative arcs, major differences, and providing a comparative table.</p>
 
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <h3 class="text-red-700">
-                            The Karaethon Cycle (The Prophecies of the Dragon)
-                        </h3>
-                        <p>
-                            This ancient and extensive cycle of prophecies
-                            details the coming of the Dragon Reborn, a figure
-                            destined to save the world from the Dark One but
-                            also to break it anew in the process. Several key
-                            prophecies from this cycle find dramatic and often
-                            literal fulfillment in *The Great Hunt*, driving the
-                            narrative forward.
-                        </p>
-                        <ul>
-                            <li>
-                                <strong
-                                    >"The Karaethon Cycle, the Prophecies of the
-                                    Dragon, says that the Dragon will be reborn
-                                    on the slopes of Dragonmount."</strong
-                                >
-                                This prophecy is explicitly fulfilled with
-                                Rand's birth on Dragonmount.
-                            </li>
-                            <li>
-                                <strong
-                                    >"For he shall come like the breaking dawn,
-                                    and shatter the world again with his coming,
-                                    and make it anew."</strong
-                                >
-                                This line links Rand to the titles "Lord of the
-                                Morning" and "Prince of the Dawn," and is
-                                reflected in the Aiel calling him "He Who Comes
-                                With The Dawn." It signifies his role in ending
-                                one age and inaugurating another, a process that
-                                involves both destruction and creation. The
-                                breaking of the world refers not only to
-                                physical changes but also the shattering of old
-                                nations and alliances, and the lives people had
-                                made for themselves, as Rand attempts to unite
-                                humanity.
-                            </li>
-                            <li>
-                                <strong
-                                    >"And it shall come to pass that what men
-                                    made shall be shattered, and the Shadow
-                                    shall lie across the Pattern of the Age, and
-                                    the Dark One shall once more lay his hand
-                                    upon the world of man. Women shall weep and
-                                    men quail as the nations of the earth are
-                                    rent like rotting cloth... Yet one shall be
-                                    born to face the Shadow... and his blood
-                                    shall give us the Light."</strong
-                                >
-                                This broader prophecy speaks to the weakening of
-                                the seals on the Dark One's prison, leading to
-                                widespread chaos, the tearing apart of nations,
-                                and the release of the Forsaken. It highlights
-                                Rand's ultimate sacrifice, with his blood being
-                                shed at Shayol Ghul to free humanity from the
-                                Shadow.
-                            </li>
-                            <li>
-                                <strong
-                                    >"Five ride forth, and four return. Above
-                                    the watchers shall he proclaim himself,
-                                    bannered cross the sky in fire, and the
-                                    Light shall not fail him in that
-                                    hour."</strong
-                                >
-                                This prophecy is directly fulfilled at the
-                                climax in Falme. Rand, Mat, Perrin, Hurin, and
-                                Ingtar ride into the city, but Ingtar, revealing
-                                himself as a Darkfriend, dies in a redemptive
-                                act, leaving only four to return. Rand's duel
-                                with Ba'alzamon, projected across the sky,
-                                serves as his public proclamation as the Dragon
-                                Reborn, with his banner unfurling in the air.
-                                This event is a crucial turning point, forcing
-                                Rand to accept his destiny.
-                            </li>
-                            <li>
-                                <strong
-                                    >"Twice and twice shall he be marked, twice
-                                    to live, and twice to die, Once the heron to
-                                    set his path. Twice the heron, to name him
-                                    true. Once the Dragon for remembrance lost.
-                                    Twice the Dragon for the price he must
-                                    pay."</strong
-                                >
-                                The first heron mark is branded on Rand's palm
-                                in the "if world," guiding his path towards
-                                Cairhien and Falme. The second heron appears
-                                after his fight with Ba'alzamon in Falme,
-                                solidifying his identity as the Dragon Reborn.
-                                The two Dragons he receives later in Rhuidean
-                                symbolize the forgotten history of the Aiel and
-                                the ultimate sacrifice he must make.
-                            </li>
-                        </ul>
-                    </div>
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <article class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-amber-600 mb-3">Book 2 Summary: The Horn, the Tower, and the Seanchan Invasion</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p><em>The Great Hunt</em> picks up with Rand al'Thor formally identified as the Dragon Reborn by the Amyrlin Seat, Siuan Sanche, at Fal Dara.[17] The Horn of Valere and the Shadar Logoth dagger are stolen by Padan Fain and Darkforces.[17] Rand, Mat, and Perrin join a Shienaran party led by Lord Ingtar Shinowa in pursuit. Their journey takes them through Portal Stones to alternative worlds, where Rand encounters Selene.[17]</p>
+                            <p>Concurrently, Egwene and Nynaeve travel to Tar Valon for Aes Sedai training, befriending Elayne Trakand and Min Farshaw. Nynaeve undergoes her Accepted test.[17] A new threat emerges with the Seanchan, who occupy Falme and use *a'dam* to enslave female channelers.[17, 18] The groups converge on Falme. Egwene is captured and collared.[17] Rand's group retrieves the Horn and dagger. Ingtar reveals himself as a Darkfriend but redeems himself.[17] Mat blows the Horn, summoning heroes like Artur Hawkwing, turning the tide against the Seanchan and Whitecloaks.[17] Rand's duel with Ba'alzamon is projected into the sky, and Selene reveals herself as Lanfear.[17]</p>
+                        </div>
+                    </article>
+                    <article class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Season 2 Recap: Scattered Heroes and Rising Threats</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p>Season 2 begins months after Rand inadvertently freed Ishamael.[11] The heroes are scattered.[11] Moiraine, believed stilled, investigates *cuendillar*, pushing Lan away and severing their bond. Lan discovers she was shielded, and their bond is restored.[10, 11]</p>
+                            <p>Perrin hunts the Horn with Shienarans, Loial, and Elyas, who teaches him about his Wolfbrother abilities. Perrin bonds with Hopper, whose death is an emotional turning point.[11] Rand hides in Cairhien, works in an asylum, connects with Logain, and develops an intimate relationship with Selene (Lanfear).[11] Nynaeve and Egwene train in the White Tower. Egwene befriends Elayne. Nynaeve's channeling is blocked, tied to anger/fear. She undergoes a traumatic Accepted test.[10, 11]</p>
+                            <p>Liandrin (Black Ajah) betrays Nynaeve, Egwene, and Elayne to the Seanchan. Egwene is captured but resists, turning the *a'dam* on her *sul'dam*, Renna, and killing her.[10, 11] Mat, held by Liandrin, meets Min (who sees him stabbing Rand), is given "soul tea" by Ishamael revealing past lives, reaches Falme, blows the Horn, and accidentally stabs Rand with the dagger.[10, 11, 13] Siuan Sanche shields Rand, intending to announce him. The Battle of Falme sees Rand defeat Ishamael (who dies prematurely). Rand is declared Dragon Reborn. Moiraine sinks Seanchan ships. Lanfear has freed other Forsaken; Moghedien appears.[10, 11, 13]</p>
+                        </div>
+                    </article>
+                </div>
 
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <h3 class="text-red-700">The Dark Prophecy</h3>
-                        <p>
-                            Inscribed on a prison wall, this prophecy offers a
-                            Shadow-aligned perspective on unfolding events,
-                            often mirroring or twisting the prophecies of the
-                            Light.
-                        </p>
-                        <ul>
-                            <li>
-                                <strong
-                                    >"Daughter of the Night, she walks again.
-                                    The ancient war, she yet fights. Her new
-                                    lover she seeks, who shall serve her and
-                                    die, yet serve still. Who shall stand
-                                    against her coming? The Shining Walls shall
-                                    kneel."</strong
-                                >
-                                "Daughter of the Night" is widely interpreted as
-                                Lanfear, one of the Forsaken, who was deeply
-                                connected to Lews Therin Telamon. The "ancient
-                                war" refers to the ongoing conflict with the
-                                Dark One. The "new lover" is most likely Rand,
-                                with the cryptic phrase "serve her and die, yet
-                                serve still" alluding to complex future
-                                interactions and potential unintended
-                                consequences of his actions that might benefit
-                                her. "The Shining Walls shall kneel" is commonly
-                                understood to refer to Tar Valon and the White
-                                Tower, suggesting its eventual subjugation,
-                                likely by the Seanchan.
-                            </li>
-                            <li>
-                                <strong
-                                    >"The man who channels stands alone. He
-                                    gives his friends for sacrifice. Two roads
-                                    before him, one to death beyond dying, one
-                                    to life eternal. Which will he choose? Which
-                                    will he choose? What hand shelters? What
-                                    hand slays?"</strong
-                                >
-                                This stanza speaks to Rand's isolation as a male
-                                channeler and the difficult choices he must
-                                make, including sacrificing those close to him.
-                                It highlights the existential dilemma of his
-                                path, offering a choice between a death that
-                                transcends mortality and an eternal life, a
-                                theme that resonates throughout the series.
-                            </li>
-                            <li>
-                                <strong
-                                    >"The Watchers wait on Toman's Head. The
-                                    seed of the Hammer burns the ancient tree.
-                                    Death shall sow, and summer burn, before the
-                                    Great Lord comes."</strong
-                                >
-                                "The Watchers wait on Toman's Head" is fulfilled
-                                by the Seanchan invasion at the end of *The
-                                Great Hunt*. "The seed of the Hammer" refers to
-                                the descendants of Artur Hawkwing, which are the
-                                Seanchan, and "burns the ancient tree" alludes
-                                to their destructive campaigns, possibly burning
-                                the Almoth Plain which had a tree emblem. The
-                                "ancient wrong" that the "seed slays again" is
-                                debated, but could refer to the Aes Sedai from
-                                the Shadow's perspective, or even the cleansing
-                                of *saidin*.
-                            </li>
-                        </ul>
-                        <p class="mt-2">
-                            These prophecies collectively underscore the
-                            deterministic nature of the Pattern, where events
-                            are woven into the fabric of time, yet characters
-                            retain a measure of free will in how they navigate
-                            these destinies. The interplay between prophecy and
-                            choice is a foundational element of the series.
-                        </p>
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Major Differences & Their Implications (Book 2 vs. Season 2):</h3>
+                <p class="mb-4 text-stone-600">Season 2 introduced further significant deviations, building upon Season 1 changes and weaving elements from multiple books. Click to explore.</p>
+                <div class="space-y-3 mb-8">
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Moiraine's Continued Struggle with the One Power and Her Bond with Lan</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Moiraine is consistently a powerful Aes Sedai; her bond with Lan is never severed.[12]</p>
+                            <p><strong>Show Depiction:</strong> S2 starts with Moiraine believing she's stilled, pushing Lan away, severing their bond. Her arc is regaining power (revealed as shielding) and restoring the bond.[10, 11, 12]</p>
+                            <p><strong>Implication:</strong> This show-only plotline adds personal challenge and depth to Moiraine, exploring the Aes Sedai-Warder bond emotionally.[12] Provides compelling material for the actress.[2, 12]</p>
+                        </div>
                     </div>
+                     <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Rand's Isolation and Relationship with Selene/Lanfear</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Rand meets Selene in an alternative world via Portal Stone; relationship is mysterious, less immediately intimate.[17]</p>
+                            <p><strong>Show Depiction:</strong> Rand hides in Cairhien, works in an asylum, connects with Logain, and develops an intimate romantic relationship with Selene (Lanfear).[11, 12]</p>
+                            <p><strong>Implication:</strong> Brings Lanfear's direct influence into Rand's life much earlier and more personally, accelerating his understanding of the One Power's dangers and adding emotional complexity.[11, 12]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Perrin's Wolfbrother Journey and the Role of Elyas</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Elyas Machera appears early in Book 1, helping Perrin understand his Wolfbrother abilities.[9] Perrin's struggle with violence is more innate.</p>
+                            <p><strong>Show Depiction:</strong> Elyas introduced in S2. Perrin bonds with Hopper, whose death by Geofram Bornhald becomes a direct, traumatic catalyst for Perrin's rage and killing of Bornhald.[11]</p>
+                            <p><strong>Implication:</strong> Show prolongs Perrin's struggle to embrace his Wolfbrother identity.[12] Hopper's death provides a more explicit, emotionally charged reason for Perrin's actions than in books.[11]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Mat's Arc: His Time with Min, the "Soul Tea," and the Horn of Valere</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Mat's healing from dagger influence is in Book 3.[19, 20] Blows Horn in Book 2.[17] Visions of past lives not linked to "soul tea."</p>
+                            <p><strong>Show Depiction:</strong> Mat captured by Liandrin, meets Min (sees visions of him stabbing Rand), given "soul tea" by Ishamael revealing past lives, blows Horn. Accidentally stabs Rand with dagger (tied to staff) at Falme.[10, 11, 13]</p>
+                            <p><strong>Implication:</strong> Mat's S2 journey is almost entirely new.[12] "Soul tea" and Min as companion provide a unique path, exploring past lives and dagger connection differently. Accidental stabbing of Rand changes circumstances of Min's vision.[11]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Nynaeve's Accepted Test and Channeling Block</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Accepted test's third arch: vision as Queen of Malkier with Lan and children, tempting her to stay.[12] Channeling block tied to anger.</p>
+                            <p><strong>Show Depiction:</strong> Channeling blocked unless angry/scared, from Fal Dara trauma.[12] Accepted test's third arch: lives full life with Lan and daughter in Two Rivers, witnesses their deaths, returns traumatized.[10, 11, 12]</p>
+                            <p><strong>Implication:</strong> Show's test designed for greater emotional impact, tying block deeper to personal trauma, making breakthroughs more visceral.[12]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Egwene's *Damane* Experience and Her Defiance</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Egwene captured and collared as *damane* in Falme, endures torment; rescued by Nynaeve and Elayne.[17]</p>
+                            <p><strong>Show Depiction:</strong> Captured and collared by Renna, endures torture, but resists, turning *a'dam* on Renna and killing her to free herself.[10, 11]</p>
+                            <p><strong>Implication:</strong> Show portrays Egwene as more resilient and powerful at this stage by having her actively resist and free herself, setting her up as a formidable force.[10, 11]</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">The Forsaken: Ishamael's Fate and the Altered Number/Roles of the Chosen</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> 13 Forsaken. Ishamael injured at Falme, later seemingly killed at Tear, reincarnated as Moridin.[6] Balthamel/Aginor die at Eye, later resurrected.[6]</p>
+                            <p><strong>Show Depiction:</strong> Implied 8 Forsaken (statuettes/seals).[6] Ishamael dies in S2 finale (premature, seemingly final).[6, 10] Lanfear reveals Ishamael freed other Forsaken; Moghedien appears.[10, 11]</p>
+                            <p><strong>Implication:</strong> Profound alteration to core mythology and antagonist lineup. Reducing Forsaken numbers and changing fates means future book plots involving specific Forsaken will be reassigned, omitted, or re-imagined, simplifying villain roster but changing strategic landscape.</p>
+                        </div>
+                    </div>
+                     <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Expanded Roles for Characters like Liandrin and Verin</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Liandrin significant but less fleshed-out early antagonist. Verin more mysterious, "dotty aunt" figure.[12]</p>
+                            <p><strong>Show Depiction:</strong> Liandrin's character significantly expanded (son, prominent role in Nynaeve/Mat's arcs).[12] Verin combined with Vandene/Adeleas' sister, more social "sweet grandmother" figure.[12]</p>
+                            <p><strong>Implication:</strong> Show invests more screen time/backstory in certain secondary characters to drive plot and emotional arcs, a practical adaptation choice for television.[12]</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Table: Book 2 vs. Season 2 Key Divergences</h3>
+                <div class="overflow-x-auto shadow-md rounded-lg">
+                    <table class="min-w-full bg-white border border-amber-300">
+                        <thead>
+                            <tr>
+                                <th class="table-cell table-header">Divergence Point</th>
+                                <th class="table-cell table-header">Book 2 Depiction</th>
+                                <th class="table-cell table-header">Season 2 Depiction</th>
+                                <th class="table-cell table-header">Implication for Reading Book 6+</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-stone-700">
+                            <tr>
+                                <td class="table-cell font-medium">Moiraine's Power Status</td>
+                                <td class="table-cell">Consistently powerful Aes Sedai; bond with Lan intact</td>
+                                <td class="table-cell">Believed stilled, later revealed shielded; bond severed then restored</td>
+                                <td class="table-cell">Moiraine's struggle with power loss and bond severance is unique to the show; in books, she's consistently strong.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Rand's Selene Relationship</td>
+                                <td class="table-cell">Meets Selene in a portal world; relationship less intimate/mysterious</td>
+                                <td class="table-cell">Hides in Cairhien; intimate romantic relationship with Selene/Lanfear</td>
+                                <td class="table-cell">Rand's early interactions with Lanfear are more personal and direct in the show, accelerating their complex dynamic.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Perrin's Wolfbrother Catalyst</td>
+                                <td class="table-cell">Elyas introduced early (Book 1) to explain abilities; aversion to violence is innate</td>
+                                <td class="table-cell">Elyas introduced in S2; Hopper's death by Bornhald serves as direct, traumatic catalyst for rage</td>
+                                <td class="table-cell">Perrin's wolf-related struggles are more drawn out and his violence more directly triggered by trauma in the show.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Mat's Season 2 Arc</td>
+                                <td class="table-cell">Healed from dagger in Book 3; blows Horn in Book 2; no "soul tea" or accidental stabbing of Rand</td>
+                                <td class="table-cell">Captured by Liandrin; meets Min; given "soul tea" revealing past lives; accidentally stabs Rand with dagger</td>
+                                <td class="table-cell">Mat's entire S2 plotline is largely new to the show, combining elements from later books and introducing new events.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Nynaeve's Accepted Test</td>
+                                <td class="table-cell">Third arch vision: Queen of Malkier with Lan and children, tempting her to stay</td>
+                                <td class="table-cell">Third arch vision: Living a full life with Lan and daughter in Two Rivers, witnessing their deaths; traumatic</td>
+                                <td class="table-cell">Nynaeve's test in the show is designed for greater emotional impact and ties her block more deeply to personal trauma.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Egwene's *Damane* Arc</td>
+                                <td class="table-cell">Captured and tortured; rescued by Nynaeve and Elayne</td>
+                                <td class="table-cell">Captured and tortured; self-liberates by turning *a'dam* on Renna and killing her</td>
+                                <td class="table-cell">Egwene's agency and resilience are significantly amplified in the show during her captivity.</td>
+                            </tr>
+                            <tr>
+                                <td class="table-cell font-medium">Forsaken Numbers/Fates</td>
+                                <td class="table-cell">13 Forsaken; Ishamael injured at Falme, reincarnated later; Balthamel/Aginor resurrected</td>
+                                <td class="table-cell">Implied 8 Forsaken; Ishamael dies prematurely in S2 finale; Moghedien introduced</td>
+                                <td class="table-cell">The structure and fates of the primary antagonists are fundamentally altered in the show.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section id="book3" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">IV. The Dragon Reborn (Book 3) vs. Season 3: Destiny's Call and Shifting Perspectives</h2>
+                 <p class="mb-6 text-stone-600 italic">Explore the narrative of "The Dragon Reborn" and the corresponding events in Season 3, noting key differences and their implications.</p>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <article class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-amber-600 mb-3">Book 3 Summary: Rand's Flight and the Heart of the Stone</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p><em>The Dragon Reborn</em> features surprisingly little of Rand al'Thor's direct perspective. The narrative primarily follows Mat, Perrin, and the trio of Nynaeve, Egwene, and Elayne.[19, 20] Rand is on the run, driven to reach Tear and claim *Callandor* from the Heart of the Stone.[20]</p>
+                            <p>Perrin, with Moiraine, Lan, and Loial, pursues Rand, grappling with his wolf abilities and maintaining his humanity.[19, 20] Mat, healed from the dagger's influence in Tar Valon, displays innate luck and fighting prowess (iconic quarterstaff duel against Galad/Gawyn).[19, 20] Egwene, Elayne, and Nynaeve in Tar Valon delve into Aes Sedai politics, discovering and confirming the Black Ajah.[20] Groups converge on Tear; Rand claims *Callandor*, publicly declaring himself Dragon Reborn.[19, 20] Faile is introduced.[19]</p>
+                        </div>
+                    </article>
+                    <article class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Season 3 Recap: The Aiel Waste, White Tower Schism, and Personal Trials</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p>Season 3 weaves elements from multiple books. Rand, publicly declared Dragon Reborn, defies prophecy to travel to the Aiel Waste to become *Car'a'carn* and gather an army.[13, 21] His powers develop; he understands himself through past life visions.[21]</p>
+                            <p>Moiraine navigates her alliance with Lanfear and diminishing control over Rand; experiences traumatic Rhuidean vision; defeats Lanfear after sensing Siuan's death.[21] White Tower schism: Siuan Sanche deposed and executed by Elaida (premature death).[13, 14, 21] Egwene recovers from *damane* trauma, develops powers, learns Dreamwalking (*Tel'aran'rhiod*) from Aiel Wise Ones, highlighting ideological distance from Rand.[21]</p>
+                            <p>Perrin returns to Two Rivers, confronts Laila's death trauma, faces Trollocs/Whitecloaks led by Dain Bornhald (seeking vengeance).[21] Meets Faile; romance begins.[21] Loial sacrifices himself destroying a Waygate.[14, 21] Nynaeve, Mat, Elayne, Min hunt Black Ajah in Tanchico. Mat accidentally enters Eelfinn realm, makes three wishes, found hanging, revived by Min.[14, 21] Nynaeve breaks channeling block.[21] Sammael introduced as King of Illian, killed by Moghedien.[14] Eamon Valda dies.[14] Elayne/Aviendha in active romantic/sexual relationship.[14, 16] Thom Merrilin reappears.[14, 21]</p>
+                        </div>
+                    </article>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Major Differences & Their Implications (Book 3 vs. Season 3):</h3>
+                 <p class="mb-4 text-stone-600">Season 3 continues to consolidate and re-sequence major plotlines from Books 3, 4, and 5. Click to explore key divergences.</p>
+                <div class="space-y-3 mb-8">
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Rand's Arc and Destination</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Rand's direct perspective reduced in *The Dragon Reborn*; he journeys to Tear to claim *Callandor*.[19, 20]</p>
+                            <p><strong>Show Depiction:</strong> Rand central in S3. Travels to Aiel Waste to fulfill *Car'a'carn* prophecy and gather army (Book 4 plot).[13, 21]</p>
+                            <p><strong>Implication:</strong> Show keeps Rand central, addressing criticism of Book 3's reduced Rand perspective.[19, 20] Streamlines narrative by pulling Book 4 events into S3, accelerating Rand's development as *Car'a'carn* and army acquisition, impacting pacing and ensuring protagonist visibility.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Siuan Sanche's Fate</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Siuan Sanche deposed and "stilled" by Elaida, escapes, continues significant political/strategic role until Last Battle death.[22, 23]</p>
+                            <p><strong>Show Depiction:</strong> Siuan deposed and executed by Elaida (premature death).[13, 14, 21]</p>
+                            <p><strong>Implication:</strong> Profound departure. Raises stakes of White Tower schism, removes key political player/mentor. Necessitates alternative plot developments for Aes Sedai internal conflicts and Rand relationship, as crucial ally/info source is gone.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Loial's Fate</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Loial survives entire series, plays various roles (including closing Waygate without dying).[14, 22]</p>
+                            <p><strong>Show Depiction:</strong> Loial sacrifices himself destroying a Waygate, dies in S3.[14, 21]</p>
+                            <p><strong>Implication:</strong> Significant, tragic change for emotional impact and stakes.[14] Removes beloved character who plays role in future book events (scholarly pursuits, history). Readers will encounter living Loial in books.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Thom Merrilin's Reappearance Timing</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Thom reappears in *The Great Hunt* (Book 2) after "seeming death" in Book 1.[14]</p>
+                            <p><strong>Show Depiction:</strong> Thom's reappearance delayed until S3.[14, 21]</p>
+                            <p><strong>Implication:</strong> Consequence of earlier plot condensation and reduced S1 role.[1, 8] Absence from S2 meant his book roles (Cairhien, Nynaeve/Elayne) cut or shifted, impacting early mentorship and presence.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Elayne and Aviendha's Relationship</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Elayne/Aviendha develop close "first-sister" bond (Aiel cultural relationship: deep friendship, trust). No romantic/sexual element. Rand engages in polyamory with both.[14, 16]</p>
+                            <p><strong>Show Depiction:</strong> Elayne and Aviendha in active romantic and sexual relationship.[14, 16]</p>
+                            <p><strong>Implication:</strong> Significant change reflecting show's choice for queer relationships (contemporary adaptation).[14, 16] Fundamentally changes Rand's established romantic arc and complex polyamorous relationships from source material.</p>
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+            <section id="book4" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">V. The Shadow Rising (Book 4) vs. Season 3 (Continued): Deepening Divides and New Chapters</h2>
+                <p class="mb-6 text-stone-600 italic">"The Shadow Rising" is a lengthy book with multiple plotlines. Season 3 of the show incorporates elements from it, often with alterations. This section examines these connections.</p>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <article class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-amber-600 mb-3">Book 4 Summary: The Aiel Waste, Two Rivers, and Tanchico</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p><em>The Shadow Rising</em>, longest in series, lacks a prologue.[22] Four concurrent plotlines follow events in Tear.</p>
+                            <p>Rand travels to Aiel Waste to be acknowledged as *Car'a'carn*. Enters *ter'angreal* in Rhuidean, relives ancestral memories, discovers Aiel's pacifist history, emerges with dragon markings.[22] Mat also enters *ter'angreal*, encounters Eelfinn, requests gifts (Old Tongue fluency, memories, *ashandarei* spear, anti-One Power medallion), found hanging from Tree of Life, revived by Rand.[22]</p>
+                            <p>Perrin returns to Two Rivers with Faile, Loial, Aiel. Finds family murdered by Trollocs (Fain's doing). Rallies villagers against Trollocs/Children of the Light. Marries Faile, earns titles 'Lord Perrin', 'Perrin Goldeneyes'.[22]</p>
+                            <p>Elayne, Nynaeve, Thom travel to Tarabon to hunt Black Ajah. In Tanchico, encounter Moghedien, discover enemy wants male *a'dam* for Rand. Nynaeve/Elayne rescue Panarch Amathera, retrieve *a'dam* and seal. Nynaeve duels Moghedien (roughly equal), Moghedien escapes.[22] Min in Tar Valon reports to Amyrlin Siuan, entangled in coup where Elaida deposes/stills Siuan/Leane. Siuan escapes with Min/Logain.[22]</p>
+                        </div>
+                    </article>
+                    <article class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Season 3 (Continued) Recap (relevant parts from Book 4)</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p>Season 3 pulls elements from *The Shadow Rising* and *The Fires of Heaven*.</p>
+                            <p>Rand travels to Aiel Waste to fulfill *Car'a'carn* destiny, gain army.[13, 21] Experiences past life visions.[21] Egwene recovers from *damane* trauma, develops powers, learns Dreamwalking from Aiel Wise Ones.[21]</p>
+                            <p>Perrin returns to Two Rivers, confronts Laila's death trauma, battles Trollocs/Whitecloaks (Dain Bornhald seeking vengeance).[21] Meets Faile, romance begins.[21] Loial sacrifices himself destroying Waygate.[14, 21]</p>
+                            <p>Nynaeve, Mat, Elayne, Min hunt Black Ajah in Tanchico. Mat accidentally enters Eelfinn realm, makes three wishes, found hanging, revived by Min.[14, 21] Nynaeve breaks channeling block.[21] Elayne/Aviendha in romantic/sexual relationship.[14, 16] Thom Merrilin reappears.[14, 21]</p>
+                        </div>
+                    </article>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Major Differences & Their Implications (Book 4 vs. Season 3):</h3>
+                <p class="mb-4 text-stone-600">Season 3 integrates key plotlines from *The Shadow Rising* with significant alterations. Click to explore.</p>
+                <div class="space-y-3 mb-8">
+                     <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Rand's Journey to the Aiel Waste</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> *The Shadow Rising* is when Rand travels to Aiel Waste, enters Rhuidean, relives ancestral memories, proves himself *Car'a'carn*.[22]</p>
+                            <p><strong>Show Depiction:</strong> Pivotal plot point brought forward into S3.[13, 21]</p>
+                            <p><strong>Implication:</strong> Part of show's narrative compression. Accelerates Rand's acceptance by Aiel and growth as leader. Establishes his authority/army-building earlier, affecting pacing of future conflicts.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Mat's Eelfinn Encounter</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Two separate encounters: Aelfinn (serpent-like, answer 3 questions, prophecies about future/marriage/fate)[14, 22]; Eelfinn (fox-like, grant gifts for price, leads to hanging, Rand saves him).[14, 22]</p>
+                            <p><strong>Show Depiction:</strong> Consolidated into single Eelfinn encounter. Mat makes 3 wishes, found hanging, revived by Min.[14, 21]</p>
+                            <p><strong>Implication:</strong> Omission of Aelfinn removes foundational plot point where key prophecies about Mat's future are revealed to him. Alteration of who saves him changes immediate character dynamics (Rand's presence significant in books).</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Perrin's Two Rivers Arc</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> *The Shadow Rising* details Perrin's return to Two Rivers, rallying villagers, marriage to Faile.[22]</p>
+                            <p><strong>Show Depiction:</strong> S3 covers this arc, including confronting Laila's death trauma (show-only S1 event), introduction of Faile, romance develops.[21]</p>
+                            <p><strong>Implication:</strong> Show's earlier Laila trauma feeds directly into Perrin's internal conflict/violence struggle, providing more immediate/visceral motivation than innate aversion in books.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Nynaeve/Elayne's Black Ajah Hunt (Tanchico)</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Nynaeve/Elayne travel to Tanchico, hunt Black Ajah, encounter Moghedien, discover male *a'dam*. Nynaeve duels Moghedien.[22]</p>
+                            <p><strong>Show Depiction:</strong> S3: Nynaeve, Mat, Elayne, Min hunt Black Ajah in Tanchico. Nynaeve's climactic duel is against Liandrin (Black Ajah Aes Sedai), not Moghedien.[14, 21]</p>
+                            <p><strong>Implication:</strong> Change in antagonist for Nynaeve's confrontation alters power dynamics/scale of threat. Shifts character pairings (Mat/Min involved in show, different from books).</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Min's Role and Location</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Min primarily in Tar Valon, reports to Amyrlin, entangled in White Tower coup.[22]</p>
+                            <p><strong>Show Depiction:</strong> S3: Min with Nynaeve, Mat, Elayne in Tanchico, actively hunting Black Ajah.[21]</p>
+                            <p><strong>Implication:</strong> Altered role/location means her direct involvement in White Tower politics/coup against Siuan is omitted or re-imagined. Presence in Tanchico creates new character dynamics/plot opportunities for show.</p>
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+            <section id="book5" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">VI. The Fires of Heaven (Book 5) vs. Season 3 (Continued): Climax and Consequences</h2>
+                <p class="mb-6 text-stone-600 italic">"The Fires of Heaven" brings significant developments, some of which are reflected or altered in Season 3 of the show. This section explores these crucial points.</p>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <article class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-amber-600 mb-3">Book 5 Summary: Rand's Campaign and Moiraine's Sacrifice</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p><em>The Fires of Heaven</em> is notable as Perrin Aybara does not appear.[23, 24] Focus on Rand's campaign as *Car'a'carn*.</p>
+                            <p>In Rhuidean, Rand consults Aiel Clan Chiefs, faces Darkhound ambushes (defeats with balefire).[23] Shaido Aiel (Couladin) refuse Rand, cross Dragonwall. Rand leads loyal Aiel, saves Cairhien, defeats Shaido. Mat kills Couladin (aided by Eelfinn memories).[23]</p>
+                            <p>Rand learns Rahvin overthrew Queen Morgase (presumed dead). Enraged, prepares to confront Rahvin, delayed by Moiraine.[23] Climactic Lanfear attack on Rand. Moiraine foresees this, sacrifices herself to save Rand, seemingly perishing.[23] Rand Skims to Caemlyn, forces ambushed by Rahvin. Rahvin's lightning kills Mat, Aviendha, Asmodean. Rand recklessly attacks. Battle extends to World of Dreams; Nynaeve helps Rand destroy Rahvin with Balefire. Balefire undoes Rahvin's killings.[23]</p>
+                            <p>Egwene chafes under Aiel Wise Ones' instruction.[23] Nynaeve/Elayne learn of White Tower schism, seek rebel Aes Sedai. Discover forkroot. Travel disguised to Salidar. Nynaeve confronts Moghedien in World of Dreams, ensnares her with *a'dam*, later captures her.[23] Siuan, Leane, Min travel to Salidar; Siuan persuades rebels to support Rand, build army with Gareth Bryne.[23]</p>
+                        </div>
+                    </article>
+                    <article class="bg-sky-50 p-4 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Season 3 (Continued) Recap (relevant parts from Book 5)</h3>
+                        <div class="space-y-3 text-stone-700 leading-relaxed">
+                            <p>Season 3 draws heavily from *The Shadow Rising* and *The Fires of Heaven*.</p>
+                            <p>Rand in Aiel Waste, developing powers, understanding *Car'a'carn* destiny.[13, 21] Moiraine experiences Rhuidean, later defeats Lanfear after sensing Siuan's death (Moiraine remains alive).[21]</p>
+                            <p>Perrin's S3 journey: Two Rivers, Trollocs/Whitecloaks, past trauma, Faile romance.[21] Loial sacrifices himself.[14, 21]</p>
+                            <p>Nynaeve, Mat, Elayne, Min in Tanchico hunting Black Ajah. Mat's Eelfinn encounter (found hanging by Min, revived).[14, 21] Nynaeve breaks channeling block.[21] Sammael introduced, killed by Moghedien.[14] Elayne/Aviendha in romantic/sexual relationship.[14, 16]</p>
+                        </div>
+                    </article>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-amber-600 mb-4">Major Differences & Their Implications (Book 5 vs. Season 3):</h3>
+                <p class="mb-4 text-stone-600">Season 3 incorporates climactic events from *The Fires of Heaven* with major changes to fates, relationships, and event sequences. Click to explore.</p>
+                <div class="space-y-3 mb-8">
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Perrin's Absence</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> *The Fires of Heaven* is first book where Perrin has no POV chapters, entirely absent.[23, 24]</p>
+                            <p><strong>Show Depiction:</strong> S3 heavily features Perrin in Two Rivers (past trauma, Trollocs, Faile romance).[21]</p>
+                            <p><strong>Implication:</strong> Major structural difference. Show keeps Perrin active/central, ensuring screen time/ongoing arcs. Reader will encounter Perrin's absence in Book 5, a notable shift in narrative focus.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Moiraine's Sacrifice</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Moiraine heroic sacrifice to defeat Lanfear and save Rand, seemingly perishing.[23]</p>
+                            <p><strong>Show Depiction:</strong> S3: Moiraine defeats Lanfear after sensing Siuan's death, but Moiraine remains alive/active.[21]</p>
+                            <p><strong>Implication:</strong> Major survival change. Her continued presence means her future role (filled by others or requiring her return from different fate in books) fundamentally altered. Emotional impact of book sacrifice delayed or re-imagined.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Rahvin's Death and Balefire</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Rand uses Balefire to kill Rahvin. Act undoes Rahvin's recent actions (deaths of Mat, Aviendha, Asmodean by his lightning).[23]</p>
+                            <p><strong>Show Depiction:</strong> S3 introduces Rahvin/Sammael. Rahvin lurks; Sammael killed by Moghedien.[14, 16, 21]</p>
+                            <p><strong>Implication:</strong> Different sequence for these events and Balefire use. Show appears to be reassigning Forsaken roles/fates. Circumstances of Rahvin's death and iconic Balefire use likely to unfold differently or be attributed to others.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Mat's Memories</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> Mat's Eelfinn memories (Book 4) aid him significantly in battle (e.g., vs Shaido Aiel).[23]</p>
+                            <p><strong>Show Depiction:</strong> S3: Mat gains Eelfinn memories, but narrative also introduces "holes" in his memory.[21]</p>
+                            <p><strong>Implication:</strong> Nuance in show's memory acquisition could affect his character development/reliance on ancestral memories, potentially creating new challenges/plot points not in books.</p>
+                        </div>
+                    </div>
+                    <div class="border border-amber-300 rounded-lg">
+                        <button class="accordion-button w-full flex justify-between items-center text-left p-4 bg-amber-100 hover:bg-amber-200 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="font-medium text-amber-700">Siuan/Leane/Min's Journey</span>
+                             <span class="text-xl text-amber-600">
+                                <span class="accordion-icon-closed">▼</span><span class="accordion-icon-open">▲</span>
+                            </span>
+                        </button>
+                        <div class="accordion-content p-4 border-t border-amber-300 text-stone-700 leading-relaxed">
+                            <p><strong>Book Depiction:</strong> *The Fires of Heaven* details journey of Siuan (stilled), Leane (stilled), Min to Salidar. Siuan subtly maneuvers rebel Aes Sedai to support Rand, build army.[23]</p>
+                            <p><strong>Show Depiction:</strong> S3: Siuan executed by Elaida.[14, 21]</p>
+                            <p><strong>Implication:</strong> Entire plotline of Siuan's survival, political maneuvering in Salidar, influence on Aes Sedai dynamics fundamentally altered/omitted. Show needs alternative ways to develop rebel Aes Sedai and their relationship with Dragon Reborn.</p>
+                        </div>
+                    </div>
+                </div>
+                 </section>
+
+            <section id="conclusion" class="content-section">
+                <h2 class="text-3xl font-semibold text-amber-700 mb-6 border-b-2 border-amber-300 pb-2">VII. Conclusion: Preparing for Book 6 and Beyond</h2>
+                <div class="space-y-4 text-stone-700 leading-relaxed">
+                    <p>Having navigated the first five books of Robert Jordan's <em>The Wheel of Time</em> through the lens of Amazon's three seasons, it becomes clear that the television adaptation functions as a distinct "turning of the Wheel." While the show captures the essence and many major narrative beats of the source material, it frequently diverges in significant ways, driven by the demands of the visual medium, creative interpretation, and logistical considerations.</p>
+                    <p>The analysis reveals foundational changes from the outset, such as the ambiguity of the Dragon Reborn's gender in Season 1, Rand's early solo departure, and the introduction of Perrin's wife Laila. These initial alterations set a precedent for a narrative that, while familiar, often takes different paths to reach similar destinations. Season 2 amplified these divergences, particularly with Moiraine's struggle with her channeling, Rand's intimate relationship with Lanfear, and Mat's entirely re-sequenced journey. The show's decision to reduce the number of Forsaken and alter their fates represents a profound reshaping of the overarching antagonist structure, which will have ripple effects throughout the series.</p>
+                    <p>Season 3 further consolidates and re-sequences plotlines from Books 3, 4, and 5. Rand's accelerated journey to the Aiel Waste, Siuan Sanche's premature death, and Loial's sacrifice are among the most impactful changes, altering character fates and the political landscape of the world. The shift in character relationships, such as the romantic portrayal of Elayne and Aviendha, also represents a modernization of the narrative's social dynamics.</p>
+                    <h3 class="text-2xl font-semibold text-amber-600 mt-6 mb-3">For a reader transitioning to Book 6, <em>Lord of Chaos</em>, after watching Season 3, it is imperative to approach the books as a distinct, richer, and more detailed narrative. Book 6 will assume knowledge of events and character states as they were at the conclusion of Book 5, <em>The Fires of Heaven</em>, which will differ significantly from the show's Season 3 ending. Readers should expect:</h3>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li>
+                            <strong class="text-amber-700">Character Status:</strong>
+                            <ul class="list-circle list-inside space-y-1 pl-6 mt-1">
+                                <li>Moiraine will have seemingly perished in <em>The Fires of Heaven</em>, and her absence will be keenly felt.</li>
+                                <li>Loial will be alive and well.</li>
+                                <li>Siuan Sanche will be stilled but alive, playing a crucial political role among the rebel Aes Sedai.</li>
+                                <li>Perrin will have been absent from Book 5 and will re-enter the narrative in Book 6 with his Two Rivers arc completed as per Book 4.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong class="text-amber-700">Plot Progression:</strong>
+                            <ul class="list-circle list-inside space-y-1 pl-6 mt-1">
+                                <li>The Aiel Waste storyline will have concluded in Book 4, and Rand will be consolidating his power in Cairhien and Tear.</li>
+                                <li>The White Tower schism will be ongoing, with Siuan leading the rebel Aes Sedai from Salidar.</li>
+                                <li>Mat's ancestral memories will be fully integrated, and his iconic quarterstaff skills will be established.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong class="text-amber-700">Relationships:</strong>
+                            <ul class="list-circle list-inside space-y-1 pl-6 mt-1">
+                                <li>Rand's romantic relationships with Elayne and Aviendha will be developing in a polyamorous context, without the romantic involvement between Elayne and Aviendha themselves.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong class="text-amber-700">Antagonists:</strong>
+                            <ul class="list-circle list-inside space-y-1 pl-6 mt-1">
+                                <li>The full complement of 13 Forsaken will be present, and their individual fates and interactions will differ from the show's streamlined roster.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p>The books offer a depth of character internal monologue, world-building detail, and intricate political and magical systems that the show, by necessity, condenses or alters. Readers are encouraged to embrace the books as the original, expansive vision of Robert Jordan, allowing themselves to be immersed in the nuances and complexities that define this epic fantasy series.</p>
                 </div>
             </section>
         </main>
 
-        <footer class="text-center py-8 mt-8 border-t border-amber-200">
-            <p class="text-sm text-neutral-600">
-                Interactive companion to Robert Jordan's *The Great Hunt*.
-            </p>
-            <p class="text-xs text-neutral-500">
-                Content based on the provided literary analysis. For personal
-                exploration only.
-            </p>
+        <footer class="mt-12 text-center text-sm text-stone-500">
+            <p>This interactive guide is based on the report "Bridging the Gap: Your Guide to The Wheel of Time Books 1-5 After Watching Seasons 1-3."</p>
+            <p>&copy; <span id="currentYear"></span> Interactive WoT Guide. All rights reserved (within the scope of this generated application).</p>
         </footer>
+    </div>
 
-        <div id="characterModal" class="modal">
-            <div class="modal-content">
-                <h3
-                    id="modalCharacterName"
-                    class="text-2xl font-bold text-red-800 mb-4"
-                ></h3>
-                <div
-                    id="modalCharacterDetails"
-                    class="text-sm text-neutral-700 space-y-2"
-                ></div>
-                <button
-                    id="closeModalButton"
-                    class="mt-6 bg-sky-600 hover:bg-sky-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 w-full"
-                >
-                    Close
-                </button>
-            </div>
-        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const contentSections = document.querySelectorAll('.content-section');
+            const mainContent = document.getElementById('main-content');
+            const activeNavButtonClass = 'bg-amber-700'; // Active state for main nav
+            const inactiveNavButtonClass = 'bg-amber-500'; // Inactive state for main nav
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const navButtons = document.querySelectorAll("#mainNav button");
-                const contentSections =
-                    document.querySelectorAll(".content-section");
+            // Set current year in footer
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-                navButtons.forEach((button) => {
-                    button.addEventListener("click", () => {
-                        navButtons.forEach((btn) =>
-                            btn.classList.remove("active"),
-                        );
-                        button.classList.add("active");
-
-                        contentSections.forEach((section) =>
-                            section.classList.remove("active"),
-                        );
-                        document
-                            .getElementById(button.dataset.target)
-                            .classList.add("active");
-                    });
+            // Function to switch active navigation button style
+            function setActiveNavButton(activeButton) {
+                navButtons.forEach(btn => {
+                    btn.classList.remove(activeNavButtonClass);
+                    btn.classList.add(inactiveNavButtonClass);
                 });
+                activeButton.classList.add(activeNavButtonClass);
+                activeButton.classList.remove(inactiveNavButtonClass);
+            }
+            
+            // Initialize with the first nav button active
+            if (navButtons.length > 0) {
+                 setActiveNavButton(navButtons[0]);
+            }
 
-                const collapsibles = document.querySelectorAll(
-                    ".collapsible-header",
-                );
-                collapsibles.forEach((header) => {
-                    header.addEventListener("click", () => {
-                        const content = header.nextElementSibling;
-                        const arrow = header.querySelector(".arrow");
-                        if (
-                            content.style.maxHeight &&
-                            content.style.maxHeight !== "0px"
-                        ) {
-                            content.style.maxHeight = "0px";
-                            arrow.style.transform = "rotate(0deg)";
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    
+                    setActiveNavButton(button);
+
+                    contentSections.forEach(section => {
+                        if (section.id === targetId) {
+                            section.classList.add('active');
                         } else {
-                            content.style.maxHeight =
-                                content.scrollHeight + "px";
-                            arrow.style.transform = "rotate(180deg)";
+                            section.classList.remove('active');
                         }
                     });
+                    // Scroll to the top of the content area for better UX on section change
+                    mainContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
+            });
 
-                const ctx = document
-                    .getElementById("reportFocusChart")
-                    .getContext("2d");
-                new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: [
-                            "Plot Summary",
-                            "Characters",
-                            "World & Factions",
-                            "Prophecies",
-                        ],
-                        datasets: [
-                            {
-                                label: "Coverage in Source Report (Approx. Entries/Paragraphs)",
-                                data: [16, 18, 9, 7],
-                                backgroundColor: [
-                                    "rgba(217, 119, 6, 0.6)",
-                                    "rgba(2, 132, 199, 0.6)",
-                                    "rgba(124, 58, 237, 0.6)",
-                                    "rgba(220, 38, 38, 0.6)",
-                                ],
-                                borderColor: [
-                                    "rgba(217, 119, 6, 1)",
-                                    "rgba(2, 132, 199, 1)",
-                                    "rgba(124, 58, 237, 1)",
-                                    "rgba(220, 38, 38, 1)",
-                                ],
-                                borderWidth: 1,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: {
-                                    display: true,
-                                    text: "Number of Report Sections/Entries",
-                                },
-                            },
-                        },
-                        plugins: {
-                            legend: {
-                                display: false,
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        let label = context.dataset.label || "";
-                                        if (label) {
-                                            label += ": ";
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += context.parsed.y;
-                                        }
-                                        return label;
-                                    },
-                                },
-                            },
-                        },
-                    },
-                });
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const wasActive = button.classList.contains('active');
 
-                const charactersData = [
-                    {
-                        name: "Rand al'Thor",
-                        short: "The Dragon Reborn",
-                        details:
-                            "Initially a sheep herder from Emond's Field, Rand is confirmed as the Dragon Reborn in *The Great Hunt*. He desperately attempts to escape this destiny, but the escalating strength of the Dark One and the demands of the Pattern compel him forward. His abilities with the One Power grow, though he struggles with controlling them and the inherent madness associated with male channeling. He receives sword training from Lan Mandragoran. His relationships with Mat and Perrin are those of close childhood friends, though his emerging identity as the Dragon Reborn creates friction and mistrust, particularly as he tries to distance himself for their safety. He is romantically involved with Egwene al'Vere at the book's outset. His encounters with Ba'alzamon are frequent and terrifying, resulting in him being branded with a heron mark. He forms a complex, manipulative relationship with Selene, who is revealed to be the Forsaken Lanfear, a powerful ancient channeler obsessed with him due to his past incarnation as Lews Therin Telamon.",
-                        relationships:
-                            "Friends: Mat, Perrin, Loial, Hurin. Mentor: Moiraine, Lan. Love Interest: Egwene (complex and evolving). Antagonists: Ba'alzamon (Ishamael), Lanfear, Padan Fain. Allies: Lord Ingtar (ultimately), Thom Merrilin.",
-                    },
-                    {
-                        name: "Mat Cauthon",
-                        short: "Troubled by Dagger",
-                        details:
-                            "A mischievous farm boy from Emond's Field, Mat's journey is significantly impacted by the parasitic dagger from Shadar Logoth, which causes his condition to worsen throughout the book. His attachment to the dagger is a constant source of pain and corruption, symbolizing the insidious nature of the Shadow's influence. He joins Rand and Perrin in the hunt for the Horn of Valere, which is stolen along with his dagger by Padan Fain. Mat's character development culminates in his pivotal act of blowing the Horn of Valere, summoning legendary heroes to turn the tide of battle at Falme. His loyalty to his friends, despite his often-complaining nature, is a key motivator for his actions.",
-                        relationships:
-                            "Friends: Rand, Perrin. Affected by: The parasitic Shadar Logoth dagger. Ally: Lord Ingtar's party.",
-                    },
-                    {
-                        name: "Perrin Aybara",
-                        short: "Wolfbrother",
-                        details:
-                            "A blacksmith and woodworker from Emond's Field, Perrin accompanies Rand and Mat on the quest for the Horn. His unique ability to communicate telepathically with wolves, identifying him as a wolfbrother, becomes increasingly prominent and useful in tracking. This power is presented as a significant, almost primal connection to nature, yet it also introduces an internal struggle for Perrin as he grapples with this non-human aspect of his identity. He shares a deep bond of friendship with Rand and Mat, and his steadfast nature provides a grounding presence amidst the chaos.",
-                        relationships:
-                            "Friends: Rand, Mat. Connection: Wolves (especially Hopper). Ally: Lord Ingtar's party.",
-                    },
-                    {
-                        name: "Egwene al'Vere",
-                        short: "Aspiring Aes Sedai",
-                        details:
-                            "The daughter of Emond's Field's mayor and romantically linked with Rand, Egwene possesses the 'spark' to channel the One Power. She travels to Tar Valon with Nynaeve for Aes Sedai training, becoming a novice at the White Tower. Her potential as a Dreamer is noted. Her journey takes a dark turn when she is lured to Falme by Liandrin and captured by the Seanchan, where she endures the horrific enslavement of an *a'dam*. This traumatic experience is a crucible for her character, shaping her future strength and resolve, and highlighting the brutal reality of the Seanchan culture. Her relationship with Nynaeve and Elayne strengthens as they work together to rescue her.",
-                        relationships:
-                            "Love Interest: Rand (complex and evolving). Friends: Nynaeve, Elayne, Min. Captors: Seanchan (High Lady Suroth), Liandrin (Black Ajah).",
-                    },
-                    {
-                        name: "Nynaeve al'Meara",
-                        short: "Powerful Channeler",
-                        details:
-                            "The Wisdom (healer) of Emond's Field, Nynaeve is a powerful channeler with a fierce temper. She joins Egwene in Tar Valon for Aes Sedai training and successfully passes the test to become Accepted. Her visions during the test, including one of marrying Lan, hint at her deep, often unspoken, affection for him. Her unwavering determination and loyalty to her friends, particularly Egwene, drive her to escape Seanchan capture and lead the rescue mission in Falme.",
-                        relationships:
-                            "Friends: Egwene, Elayne. Complex bond: Lan Mandragoran. Mentor: Amyrlin Seat (indirectly).",
-                    },
-                    {
-                        name: "Elayne Trakand",
-                        short: "Daughter-Heir of Andor",
-                        details:
-                            "Daughter-heir of Andor, Elayne becomes a novice at the White Tower and quickly befriends Egwene and Nynaeve. She is inadvertently drawn into Liandrin's trap in Falme but manages to escape Seanchan capture with Nynaeve, actively participating in Egwene's rescue. Her royal background and burgeoning channeling abilities position her as a significant figure for future events.",
-                        relationships:
-                            "Friends: Egwene, Nynaeve, Min. Royal Family: Daughter-Heir of Andor.",
-                    },
-                    {
-                        name: "Moiraine Damodred",
-                        short: "Aes Sedai Strategist",
-                        details:
-                            "An Aes Sedai of the Blue Ajah, Moiraine continues to guide and manipulate Rand towards his destiny as the Dragon Reborn, often to his frustration. She breaks off from the main party to seek answers independently, demonstrating her strategic and secretive nature. Her relationship with her Warder, Lan Mandragoran, is one of deep mutual respect and shared purpose.",
-                        relationships:
-                            "Warder: Lan. Protégé: Rand (indirectly), Emond's Fielders. Ally: Siuan Sanche.",
-                    },
-                    {
-                        name: "Lan Mandragoran",
-                        short: "Stoic Warder",
-                        details:
-                            "Moiraine's stoic and highly skilled Warder, Lan trains Rand in swordplay at Fal Dara. His dedication to Moiraine and his duty is absolute. He develops a complex relationship with Nynaeve, marked by unspoken affection and a deep, mutual respect that foreshadows their future bond.",
-                        relationships:
-                            "Aes Sedai: Moiraine. Connection: Nynaeve. Mentor: Rand (sword training).",
-                    },
-                    {
-                        name: "Siuan Sanche",
-                        short: "The Amyrlin Seat",
-                        details:
-                            "The Amyrlin Seat, leader of the Aes Sedai, Siuan is a powerful and astute woman. She formally confirms Rand as the Dragon Reborn and, through private conversations with Moiraine, reveals a long-standing friendship and a shared, secret plan regarding Rand's role. Her authority and foresight are critical in setting the stage for the wider conflict.",
-                        relationships:
-                            "Friend/Ally: Moiraine. Leader of: Aes Sedai.",
-                    },
-                    {
-                        name: "Selene / Lanfear",
-                        short: "The Forsaken",
-                        details:
-                            "Introduced as the mysterious and beautiful Selene in an alternate world, she guides Rand, Loial, and Hurin back to their own reality. Her true identity is revealed at the climax: Lanfear, one of the most powerful of the Forsaken. She was deeply in love with Lews Therin Telamon (Rand's previous incarnation) and seeks to rekindle that relationship, subtly attempting to influence Rand to her will. Her presence introduces a seductive and highly dangerous antagonist who operates through manipulation rather than overt aggression.",
-                        relationships:
-                            "Obsession: Rand/Lews Therin Telamon. Enemy: Forces of Light, other Forsaken. Ally: (deceptively) Rand.",
-                    },
-                    {
-                        name: "Padan Fain",
-                        short: "Corrupted Darkfriend",
-                        details:
-                            "Originally a peddler, Fain is a Darkfriend who has been corrupted by both the Dark One and the malevolent entity Mordeth from Shadar Logoth. This unique corruption transforms him into a chaotic force, hostile to both the Light and the Shadow, driven by a singular, obsessive hatred for Rand al'Thor. He steals the Horn of Valere and Mat's dagger, serving as the primary antagonist driving the 'hunt'. His unpredictable nature makes him a persistent and dangerous wild card throughout the series.",
-                        relationships:
-                            "Primary Target/Obsession: Rand. Former Master: Dark One (now acts with a terrifying independence and self-serving malice).",
-                    },
-                    {
-                        name: "Ingtar Shinowa",
-                        short: "Redeemed Darkfriend",
-                        details:
-                            "A Shienaran nobleman and soldier, Ingtar leads the party pursuing Fain and the Horn. His desperation to reclaim the Horn is ultimately revealed to stem from his secret identity as a Darkfriend, a choice made out of despair for his homeland. His final, redemptive sacrifice in Falme adds a layer of moral complexity, demonstrating that even those who have strayed can find a path to honor.",
-                        relationships:
-                            "Commander to: Rand's party (initially). Allegiance: Shadow (briefly), Light (in death). Ally: Rand, Perrin, Mat, Hurin, Loial.",
-                    },
-                    {
-                        name: "Hurin",
-                        short: "The Sniffer",
-                        details:
-                            "A 'sniffer' from Shienar, Hurin possesses the unique ability to literally smell past violence, making him an invaluable tracker of Darkfriends and Shadowspawn. He accompanies Rand through the alternate world and remains a loyal, if bewildered, companion.",
-                        relationships:
-                            "Ally: Rand, Perrin, Mat, Loial, Shienarans.",
-                    },
-                    {
-                        name: "Loial",
-                        short: "Ogier Scholar",
-                        details:
-                            "An Ogier, a non-human race known for their love of trees, books, and peaceful nature, Loial is a loyal and steadfast friend to Rand. His knowledge of ancient lore, including Portal Stones and Waygates, proves crucial at several points in the journey.",
-                        relationships:
-                            "Friend: Rand, Perrin, Mat. Race: Ogier.",
-                    },
-                    {
-                        name: "Thom Merrilin",
-                        short: "The Gleeman",
-                        details:
-                            "The traveling gleeman, Thom, is unexpectedly reunited with Rand in Cairhien, having been presumed dead. His experience and worldly wisdom provide valuable guidance to Rand, and his personal tragedy (the murder of his apprentice, Dena) underscores the pervasive danger of Rand's presence.",
-                        relationships:
-                            "Mentor figure: Rand (informally). Lost: Dena (apprentice). Ally: Rand.",
-                    },
-                    {
-                        name: "Turak",
-                        short: "Seanchan Commander",
-                        details:
-                            "High Lord Turak is a Seanchan nobleman and royal commander of the invading forces in Falme. He represents the Seanchan's martial prowess and rigid hierarchy, ultimately falling in single combat to Rand al'Thor.",
-                        relationships:
-                            "Enemy: Rand, Westlanders. Commander of: Seanchan forces in Falme.",
-                    },
-                    {
-                        name: "Suroth",
-                        short: "Seanchan Darkfriend",
-                        details:
-                            "High Lady Suroth is a Seanchan noblewoman and Darkfriend to whom Liandrin delivers the captured Aes Sedai novices. She embodies the Seanchan's brutal system of *damane* enslavement.",
-                        relationships:
-                            "Ally: Liandrin (Black Ajah). Superior to: *Damane* (including Egwene) and *sul'dam*.",
-                    },
-                    {
-                        name: "Liandrin Guirale",
-                        short: "Black Ajah Traitor",
-                        details:
-                            "An Aes Sedai of the Red Ajah, Liandrin is secretly a Darkfriend and a member of the Black Ajah. She lures Egwene, Nynaeve, and Elayne to Falme under false pretenses, betraying them to the Seanchan. Her actions expose the insidious infiltration of the Shadow within the White Tower itself.",
-                        relationships:
-                            "Betrays: Egwene, Nynaeve, Elayne, Min. Serves: Dark One (as Black Ajah). Ally: High Lady Suroth.",
-                    },
-                ];
-
-                const characterGrid = document.getElementById("characterGrid");
-                const modal = document.getElementById("characterModal");
-                const modalCharacterName =
-                    document.getElementById("modalCharacterName");
-                const modalCharacterDetails = document.getElementById(
-                    "modalCharacterDetails",
-                );
-                const closeModalButton =
-                    document.getElementById("closeModalButton");
-
-                charactersData.forEach((char) => {
-                    const card = document.createElement("div");
-                    card.className =
-                        "character-card bg-white p-4 rounded-lg shadow-md text-center";
-                    card.innerHTML = `<h4 class="font-semibold text-red-700 text-lg">${char.name}</h4><p class="text-xs text-neutral-600">${char.short}</p>`;
-                    card.addEventListener("click", () => {
-                        modalCharacterName.textContent = char.name;
-                        modalCharacterDetails.innerHTML = `
-                        <p><strong>Role & Development:</strong> ${char.details}</p>
-                        <p><strong>Key Relationships:</strong> ${char.relationships}</p>
-                    `;
-                        modal.style.display = "flex";
-                    });
-                    characterGrid.appendChild(card);
-                });
-
-                closeModalButton.addEventListener("click", () => {
-                    modal.style.display = "none";
-                });
-                modal.addEventListener("click", (event) => {
-                    if (event.target === modal) {
-                        modal.style.display = "none";
+                    // Optional: Close other accordions in the same section when one is opened
+                    // button.closest('.content-section').querySelectorAll('.accordion-button').forEach(btn => {
+                    //     if (btn !== button) {
+                    //         btn.classList.remove('active');
+                    //         btn.nextElementSibling.style.display = 'none';
+                    //     }
+                    // });
+                    
+                    button.classList.toggle('active');
+                    if (wasActive) {
+                        content.style.display = 'none';
+                    } else {
+                        content.style.display = 'block';
                     }
                 });
             });
-        </script>
-    </body>
+        });
+    </script>
+</body>
 </html>
