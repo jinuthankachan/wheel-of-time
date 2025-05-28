@@ -1,10 +1,1513 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
-        <title>Book 4</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>The Shadow Rising: Summary</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+                background-color: #f7f3ed; /* Light sand/cream */
+                color: #4a3c30; /* Darker sand/brown */
+            }
+            .header-bg {
+                background-color: #7f5c3a; /* Darker, more visible brown */
+            }
+            .nav-link {
+                padding: 0.75rem 1.25rem;
+                border-radius: 0.5rem;
+                transition: background-color 0.2s ease-in-out;
+                cursor: pointer;
+                font-weight: 500;
+                color: #fff;
+            }
+            .nav-link:hover {
+                background-color: #bb8f62; /* Slightly darker hover */
+            }
+            .nav-link.active {
+                background-color: #bb8f62; /* Active state */
+                font-weight: 600;
+            }
+            .section-container {
+                background-color: #fff; /* White for content sections */
+                border-radius: 1rem;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            .collapsible-header {
+                background-color: #fcefdc; /* Light amber */
+                border-radius: 0.75rem;
+                padding: 1rem 1.5rem;
+                cursor: pointer;
+                font-weight: 600;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: background-color 0.2s ease-in-out;
+            }
+            .collapsible-header:hover {
+                background-color: #fae4c9; /* Lighter amber on hover */
+            }
+            .collapsible-content {
+                padding: 1rem 1.5rem;
+                background-color: #fff;
+                border-radius: 0 0 0.75rem 0.75rem;
+                border-top: 1px solid #f0e0d0; /* Light border */
+                overflow: hidden;
+                max-height: 0;
+                transition: max-height 0.3s ease-out;
+            }
+            .collapsible-content.open {
+                max-height: 9999px; /* Adjusted to prevent content cutoff */
+                transition: max-height 0.5s ease-in;
+            }
+            .card {
+                background-color: #fff;
+                border-radius: 0.75rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+                transition:
+                    transform 0.2s ease-in-out,
+                    box-shadow 0.2s ease-in-out;
+                cursor: pointer;
+                border: 1px solid #f0e0d0;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            }
+            .modal {
+                background-color: rgba(0, 0, 0, 0.6);
+                backdrop-filter: blur(5px);
+                z-index: 1000;
+            }
+            .modal-content {
+                background-color: #fff;
+                border-radius: 1rem;
+                max-height: 90vh;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #d1a87d #f7f3ed;
+            }
+            .modal-content::-webkit-scrollbar {
+                width: 8px;
+            }
+            .modal-content::-webkit-scrollbar-track {
+                background: #f7f3ed;
+                border-radius: 10px;
+            }
+            .modal-content::-webkit-scrollbar-thumb {
+                background-color: #d1a87d;
+                border-radius: 10px;
+                border: 2px solid #f7f3ed;
+            }
+            .close-button {
+                background-color: #e57373; /* Red for close */
+                color: white;
+                border-radius: 9999px; /* Fully rounded */
+                width: 2.5rem;
+                height: 2.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                line-height: 1;
+                transition: background-color 0.2s ease-in-out;
+            }
+            .close-button:hover {
+                background-color: #ef5350; /* Darker red on hover */
+            }
+            .table-custom {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1rem;
+            }
+            .table-custom th,
+            .table-custom td {
+                border: 1px solid #f0e0d0;
+                padding: 0.75rem;
+                text-align: left;
+            }
+            .table-custom th {
+                background-color: #fcefdc;
+                font-weight: 600;
+            }
+            .table-custom tr:nth-child(even) {
+                background-color: #fdfaf7;
+            }
+        </style>
     </head>
-    <body>
-        <h1>Book 4</h1>
-        <p>Coming soon...</p>
+    <body class="min-h-screen">
+        <header class="header-bg shadow-md p-4 sticky top-0 z-50">
+            <div
+                class="container mx-auto flex flex-col md:flex-row justify-between items-center"
+            >
+                <h1 class="text-3xl font-bold text-white mb-4 md:mb-0">
+                    The Shadow Rising
+                </h1>
+                <nav class="flex flex-wrap justify-center gap-2">
+                    <button class="nav-link active" data-section="overview">
+                        Overview
+                    </button>
+                    <button class="nav-link" data-section="story">
+                        The Story
+                    </button>
+                    <button class="nav-link" data-section="characters">
+                        Characters
+                    </button>
+                    <button class="nav-link" data-section="places">
+                        Places
+                    </button>
+                    <button class="nav-link" data-section="world-factions">
+                        World & Factions
+                    </button>
+                    <button class="nav-link" data-section="prophecies">
+                        Prophecies
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 md:p-8">
+            <section id="overview" class="section-container p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    Overview
+                </h2>
+                <p class="mb-4">
+                    <em>The Shadow Rising</em> marks a profound expansion and
+                    pivotal point in Robert Jordan's acclaimed
+                    <em>Wheel of Time</em> saga, serving as the fourth
+                    installment in the fourteen-book epic fantasy series.
+                    Following the dramatic conclusion of
+                    <em>The Dragon Reborn</em>, Rand al'Thor has publicly
+                    embraced his identity as the Dragon Reborn and now wields
+                    the legendary crystal sword, Callandor. This declaration
+                    sets the stage for a narrative that moves beyond the
+                    singular focus on Rand's initial journey, transforming the
+                    series into a multi-protagonist, multi-location epic. The
+                    structural and thematic shifts introduced here are
+                    significant, broadening the narrative beyond a singular
+                    hero's quest to encompass a more complex, interwoven
+                    tapestry of destinies, a precedent that defines the
+                    subsequent volumes of the series.
+                </p>
+                <p class="mb-4">
+                    Published by Tor Books, *The Shadow Rising* was released on
+                    September 15, 1992, with some editions showing an October
+                    15, 1993, publication date. This volume is notable for its
+                    sheer scale, comprising 393,823 words across 1007 pages and
+                    58 chapters, making it the longest book in *The Wheel of
+                    Time* series by word count. Critically, it received
+                    significant praise, with *Kirkus Review* hailing it as "a
+                    work of genuine and often stirring imagination," and
+                    *Publishers Weekly* noting that "the sheer force of
+                    [Jordan's] invention develops a momentum that [is] hard to
+                    resist". Many readers consider it a standout entry and a
+                    strong favorite within the series.
+                </p>
+                <p>
+                    This novel serves as a critical turning point in the saga,
+                    profoundly broadening the world's scope and deepening the
+                    character arcs of its ensemble cast. Unlike its
+                    predecessors, which largely followed a more unified
+                    narrative, *The Shadow Rising* strategically divides the
+                    main protagonists into four distinct, yet intricately
+                    connected, plotlines: one in the Aiel Waste, another in the
+                    Two Rivers, a third in Tanchico in Tarabon, and a fourth
+                    centered on the White Tower. This innovative structural
+                    choice allows for an unparalleled expansion of
+                    world-building and character development, with each
+                    storyline maintaining a compelling and equally important
+                    presence. The narrative delves deeply into Rand's acceptance
+                    of his monumental destiny, Perrin's reluctant but resolute
+                    assumption of leadership, Egwene's burgeoning abilities in
+                    the World of Dreams, and Nynaeve and Elayne's critical
+                    mission against the pervasive Black Ajah. This deliberate
+                    expansion moves the series beyond a conventional hero's
+                    journey, establishing a complex, interwoven epic that
+                    solidifies Jordan's mastery of long-form storytelling.
+                </p>
+            </section>
+
+            <section id="story" class="section-container p-6 mb-8 hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    The Story: Chronological Narrative
+                </h2>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="tear-start"
+                    >
+                        <span>The Unsettling Start in Tear</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="tear-start">
+                        <p class="mb-2">
+                            The narrative commences in the Stone of Tear, where
+                            Rand al'Thor is navigating his new responsibilities
+                            as its ruler while diligently studying the
+                            Prophecies of the Dragon. This period is marked by
+                            an unsettling phenomenon known as a "bubble of
+                            evil," a pervasive corruption of reality that causes
+                            inanimate objects—such as Rand's mirrors, Mat's
+                            playing cards, and Perrin's axe—to turn hostile and
+                            attack their owners. This widespread chaos is not a
+                            direct assault but a deeper, more insidious
+                            manifestation of the Dark One's increasing
+                            influence, signaling a fundamental weakening of the
+                            very fabric of the Pattern. This type of threat,
+                            which undermines the perceived safety and
+                            predictability of the environment, significantly
+                            elevates the stakes beyond mere military conflict,
+                            highlighting that the struggle is against an
+                            existential unraveling of the natural order.
+                        </p>
+                        <p class="mb-2">
+                            During this time, Rand receives a clandestine
+                            nighttime visit from the Forsaken Lanfear, who
+                            offers him glimpses into the Forsaken's overarching
+                            plans. Subsequently, the Stone of Tear is stormed by
+                            Trollocs and Myrddraal, forces dispatched by the
+                            Forsaken Sammael. Wielding Callandor, Rand unleashes
+                            a devastating lightning storm, annihilating all the
+                            Shadowspawn. In a disturbing display of his
+                            burgeoning, untamed power, Rand attempts to
+                            resurrect a dead child, an act that deeply alarms
+                            Moiraine. Before departing Tear, Rand, Mat Cauthon,
+                            and Moiraine Damodred visit a mysterious doorframe
+                            *ter'angreal* that grants them an audience with the
+                            snake-like Aelfinn, beings rumored to possess
+                            answers to any question. From them, Mat receives a
+                            dire warning: he must journey to Rhuidean or face
+                            death, and he is destined to marry "the Daughter of
+                            the Nine Moons". Moiraine, too, gains profound
+                            foresight from her encounter.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="rand-destiny"
+                    >
+                        <span
+                            >Rand al'Thor: Embracing the Dragon's Destiny</span
+                        >
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="rand-destiny">
+                        <p class="mb-2">
+                            Driven by prophecy and a profound need to understand
+                            his heritage, Rand resolves to travel to the Aiel
+                            Waste to be acknowledged as the Aiel's prophesied
+                            leader, "He Who Comes With the Dawn". In a symbolic
+                            act of self-reliance, he intentionally leaves
+                            Callandor behind in Tear. Utilizing a Portal Stone,
+                            he transports himself, Mat, Egwene, Moiraine, and
+                            Lan to the Aiel Waste.
+                        </p>
+                        <p class="mb-2">
+                            Upon their arrival in Rhuidean, Rand enters a series
+                            of glass columns, which are powerful *ter'angreal*.
+                            Inside, he is immersed in a visceral experience,
+                            reliving the memories of his paternal ancestors and
+                            witnessing the entire history of the Aiel, from
+                            before the Breaking of the World to their current
+                            state. This direct immersion reveals the profound
+                            truth that the Aiel were originally pacifists, known
+                            as the Da'shain Aiel ("People Dedicated to Peace"),
+                            who served the Aes Sedai and were entrusted with
+                            safeguarding a vast collection of *angreal*,
+                            *sa'angreal*, and *ter'angreal* during the Breaking.
+                            He learns how the Aiel clans diverged from the Way
+                            of the Leaf to become warriors, and how the Tinkers
+                            also split off from the original Da'shain Aiel. This
+                            experience is a redefinition of Aiel identity, as it
+                            shatters their cultural myth of being born warriors
+                            and reveals their current state as an adaptation to
+                            brutal circumstances.
+                        </p>
+                        <p class="mb-2">
+                            Rand emerges from the *ter'angreal* with dragon
+                            markings on both arms, fulfilling a key prophecy and
+                            validating his identity as the Car'a'carn, the
+                            "Chief of Chiefs" of all the Aiel. His emergence at
+                            dawn further fulfills prophecy. Accompanied by the
+                            Taardad Aiel, led by Rhuarc, Rand proceeds to Alcair
+                            Dal to present himself to the assembled clan chiefs.
+                            However, Couladin of the Shaido Aiel preempts him,
+                            proclaiming himself "He Who Comes With the Dawn" and
+                            displaying identical dragon tattoos. Rand counters
+                            by revealing his own dragons and, more importantly,
+                            the secret history of the Aiel as pacifists from the
+                            Age of Legends. This devastating revelation incites
+                            an uproar and profound division among the Aiel,
+                            leading to infighting, which Rand dramatically halts
+                            by making it rain in the arid Waste. This act places
+                            an immense burden of truth on Rand as the
+                            Car'a'carn, forcing the Aiel to confront a
+                            foundational contradiction in their identity and
+                            requiring him to reconcile their past with their
+                            present and future.
+                        </p>
+                        <p class="mb-2">
+                            Earlier, Rand's party had encountered Lanfear and
+                            Asmodean disguised as suspicious peddlers. After the
+                            Alcair Dal confrontation, Lanfear reappears,
+                            informing Rand that Asmodean has fled back to
+                            Rhuidean. Rand uses a newly discovered weave called
+                            Skimming to quickly reach the city. He engages
+                            Asmodean in a fierce battle over the access
+                            *ter'angreal* for the Choedan Kal, ultimately
+                            winning and severing Asmodean's link to the Dark
+                            One. Lanfear then intervenes, shielding Asmodean to
+                            allow him to channel only enough to serve as Rand's
+                            reluctant teacher in the One Power, fulfilling a
+                            prophecy that Asmodean would teach him to wield the
+                            Power without it killing him. They then return to
+                            Alcair Dal. The Wise Ones task Aviendha with
+                            teaching Rand Aiel customs, leading to some amusing
+                            cultural blunders for Rand. Despite initial
+                            recalcitrance, a bond begins to form between them.
+                            After an attack by Trollocs, Rand acquires a
+                            bodyguard comprised of *Far Dareis Mai* (Maidens of
+                            the Spear), including Aviendha. Aviendha is drawn to
+                            Rand and is later revealed to be the first of his
+                            three lovers to sleep with him, though she initially
+                            holds back due to her friendship with Elayne.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="mat-fate"
+                    >
+                        <span>Mat Cauthon: The Gambler's Unfolding Fate</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="mat-fate">
+                        <p class="mb-2">
+                            Mat, initially desiring to leave Tear, finds himself
+                            unable to escape Rand's powerful *ta'veren* pull,
+                            compelling him to accompany Rand to the Aiel Waste.
+                            Compelled by the Aelfinn's prophecy that he must go
+                            to Rhuidean or die, Mat enters the legendary city.
+                            He discovers another doorframe *ter'angreal* there.
+                        </p>
+                        <p class="mb-2">
+                            Mat attempts to ask more questions inside this
+                            second *ter'angreal* but inadvertently makes a
+                            complex bargain with the fox-like Eelfinn instead.
+                            He "ignorantly requests" several gifts: fluency in
+                            the Old Tongue, memories of his own ancestors (which
+                            turn out to be memories of past lives as military
+                            leaders), a unique spear called an *ashandarei*, and
+                            a medallion *ter'angreal* that protects him from the
+                            One Power (the foxhead medallion). The price for
+                            these gifts is a symbolic hanging from the Tree of
+                            Life (Avendesora), leaving him with a permanently
+                            scarred neck. This seemingly accidental bargain is a
+                            pivotal moment that irrevocably alters Mat's
+                            destiny. The gifts he receives, particularly the new
+                            memories of past lives, are crucial for his future
+                            role as a military strategist and leader of the Band
+                            of the Red Hand. The medallion provides vital
+                            protection against the One Power. This
+                            transformation, though born from a misstep, equips
+                            him with the unique skills and defenses necessary
+                            for his future role in the Last Battle, highlighting
+                            the unpredictable and often dangerous nature of
+                            interacting with ancient powers and the subtle ways
+                            the Pattern guides individuals towards their roles.
+                            Mat begins to embrace his extraordinary luck and the
+                            knowledge of his past lives, shifting from a
+                            reluctant companion to a figure destined for
+                            leadership. His character is deeply influenced by
+                            Norse mythology, particularly Odin, evidenced by his
+                            wide-brimmed hat, the ravens on his spear, and his
+                            later eye sacrifice. He also develops a strong
+                            distrust of Aes Sedai.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="perrin-stand"
+                    >
+                        <span>Perrin Aybara: The Wolfbrother's Stand</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="perrin-stand">
+                        <p class="mb-2">
+                            Perrin's axe turns against him during the "bubble of
+                            evil" in Tear. Upon learning that Whitecloaks are
+                            searching for him in his homeland, he resolves to
+                            return to the Two Rivers via the Ways, accompanied
+                            by Loial, Faile (who cleverly tricks Loial into
+                            bringing her along), and three Aiel (Gaul, Bain, and
+                            Chiad). His arrival is met with tragedy: he
+                            discovers his family has been murdered, the al'Thor
+                            farm burned, and Mat's sisters and the blacksmith
+                            held captive by Whitecloaks.
+                        </p>
+                        <p class="mb-2">
+                            Perrin learns that the local wolves are being hunted
+                            in *Tel'aran'rhiod* by a mysterious figure known as
+                            Slayer, who bears a resemblance to Lan. Perrin
+                            continues to grapple with and embrace his unique
+                            ability to communicate with wolves, gaining enhanced
+                            senses and his distinctive yellow eyes, solidifying
+                            his identity as "Young Bull" among them. This
+                            storyline, though geographically confined to the Two
+                            Rivers, is thematically expansive, serving as a
+                            microcosm of the larger war against the Shadow.
+                        </p>
+                        <p class="mb-2">
+                            Padan Fain is revealed to be with the Whitecloaks,
+                            secretly leading bands of Trollocs to the area.
+                            Faile convinces Perrin not to surrender to the
+                            Whitecloaks and helps him free his captive
+                            countrymen. Inspired by stories of his adventures, a
+                            growing entourage of young men from the villages
+                            rallies to Perrin, and he leads them to hunt
+                            Trollocs. After an encounter with a shady Hunter for
+                            the Horn named Luc (later identified as Slayer),
+                            Perrin's hunting party is decimated by a Trolloc
+                            ambush. They seek refuge with the Tuatha'an before
+                            returning to a now-fortified Emond's Field, where
+                            Perrin is Healed by Alanna Sedai. Perrin learns that
+                            the Waygate, previously locked by Loial, has been
+                            reopened, prompting Loial and Gaul to depart to
+                            close it.
+                        </p>
+                        <p class="mb-2">
+                            Trollocs attack Emond's Field by the thousands,
+                            initially repulsed. The Tuatha'an and then the
+                            Whitecloaks are invited inside the pickets for
+                            protection, and the Tinker Aram abandons his
+                            people's pacifist Way of the Leaf to take up a
+                            sword. Verin and Alanna fight with the One Power,
+                            but the Whitecloaks stubbornly refuse to join the
+                            fight against the Shadowspawn. Perrin persuades
+                            Faile to leave the Two Rivers under the pretense of
+                            sending a message to Queen Morgase; she agrees only
+                            if Perrin will marry her. They are wed. Faile
+                            returns with crucial reinforcements from Watch Hill
+                            and Deven Ride. The Trollocs are ultimately routed,
+                            and the Whitecloaks are evicted from the Two Rivers.
+                            This arc showcases Perrin's profound transformation
+                            from a gentle, hesitant village boy to a decisive,
+                            albeit reluctant, commander, demonstrating that
+                            heroism can emerge from unexpected places and
+                            through personal sacrifice, and that leadership
+                            often means adapting to dire circumstances with
+                            unreliable allies.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="egwene-ascent"
+                    >
+                        <span>Egwene al'Vere: The Dreamwalker's Ascent</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="egwene-ascent">
+                        <p class="mb-2">
+                            Egwene, alongside Elayne and Nynaeve, interrogates
+                            their Black Ajah prisoners, uncovering that Liandrin
+                            and others have gone to Tanchico. She and Elayne
+                            discuss their feelings for Rand, with Egwene
+                            magnanimously giving Elayne her blessing to pursue
+                            him. While exploring Tanchico in *Tel'aran'rhiod*,
+                            Egwene encounters the Aiel Wise One Amys, who
+                            instructs her to come to the Aiel Waste for
+                            training. Egwene subsequently arrives at Rhuidean
+                            with Rand's party and commences her intensive
+                            training as a dreamwalker. Egwene demonstrates rapid
+                            growth in her power and mastery of the World of
+                            Dreams, quickly becoming a formidable figure in her
+                            own right. She is characterized by her
+                            determination, strong desire to learn, and ambition.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="nynaeve-elayne-hunt"
+                    >
+                        <span
+                            >Nynaeve al'Meara & Elayne Trakand: The Hunt in
+                            Tanchico</span
+                        >
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="nynaeve-elayne-hunt">
+                        <p class="mb-2">
+                            Nynaeve and Elayne's primary mission is to track the
+                            Black Ajah, who they learn are in Tanchico, and
+                            specifically to prevent them from acquiring a male
+                            *a'dam*. They set sail for Tanchico aboard a Sea
+                            Folk ship, accompanied by their protectors, Juilin
+                            Sandar and Thom Merrilin. This plotline reveals the
+                            pervasive nature of the Shadow's infiltration and
+                            the immediate, existential threat posed by the
+                            Forsaken's schemes to control or corrupt the Dragon
+                            Reborn.
+                        </p>
+                        <p class="mb-2">
+                            In Tanchico, they reunite with Bayle Domon, who
+                            assists them in establishing an information network.
+                            They encounter Egeanin, a Seanchan woman who is
+                            hunting runaway *sul'dam*. Egeanin initially takes
+                            advantage of the opportunity to learn about them.
+                            After spending an uneasy night with Egeanin as a
+                            prisoner, the revelation that Panarch Amathera is
+                            being held captive by the Black Ajah in her own
+                            palace prompts Egeanin to offer her assistance.
+                        </p>
+                        <p class="mb-2">
+                            They are interrogated by the Forsaken Moghedien, who
+                            leaves them unharmed but demonstrates the formidable
+                            threat she poses. In a significant display of power,
+                            Nynaeve later duels Moghedien and wins, briefly
+                            encountering the Black Ajah. Nynaeve also meets
+                            Birgitte Silverbow, a Hero of the Horn, in
+                            *Tel'aran'rhiod*. To save Birgitte's life after a
+                            confrontation with Moghedien, Elayne forms an
+                            unwilling Warder bond with her, making Birgitte a
+                            permanent fixture in Elayne's life. Nynaeve recovers
+                            what she believes to be a male *a'dam* from the
+                            Panarch's museum. Egeanin and Domon agree to dispose
+                            of the dangerous artifact in the sea. Elayne and
+                            Egeanin successfully rescue Panarch Amathera from
+                            her captivity. Nynaeve continues to develop her
+                            formidable healing prowess and unwavering
+                            determination. Elayne grows in strength and begins
+                            to grapple with her royal duties, preparing for
+                            future leadership.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="white-tower-coup"
+                    >
+                        <span>The White Tower: A Coup and Its Fallout</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="white-tower-coup">
+                        <p class="mb-2">
+                            Min Farshaw arrives in Tar Valon, reporting to the
+                            Amyrlin Siuan Sanche and attempting to avoid
+                            suspicion by adopting the guise of a giddy,
+                            empty-headed woman named Elmindreda. A dramatic
+                            internal political upheaval then occurs: Siuan
+                            Sanche, the Amyrlin Seat, and Leane Sharif, her
+                            Keeper of the Chronicles, are deposed and brutally
+                            stilled (severed from the One Power) by Elaida Sedai
+                            and her supporters. They are subsequently tortured
+                            for information.
+                        </p>
+                        <p class="mb-2">
+                            Elaida, a powerful and ambitious Red Ajah Aes Sedai
+                            with a talent for Foretelling, gains the support of
+                            the White and Red Ajahs, including key members of
+                            the Black Ajah like Alviarin Freidhen. She becomes
+                            the new Amyrlin Seat, with Alviarin taking Leane's
+                            former role. It is revealed that most of Elaida's
+                            Aes Sedai supporters are secretly part of the Black
+                            Ajah, and that Elaida herself is unwittingly a
+                            puppet of the Forsaken Rahvin, who thus gains
+                            control over the White Tower. This event signifies a
+                            major strategic victory for the Shadow, as it
+                            effectively neutralizes a powerful force for the
+                            Light by sowing internal discord and placing a
+                            compromised figure in a position of immense
+                            authority. This demonstrates how the Shadow's
+                            greatest successes often come from internal
+                            corruption and division rather than direct
+                            confrontation, profoundly weakening the Light's
+                            ability to resist the Last Battle.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="characters" class="section-container p-6 mb-8 hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    Main Characters
+                </h2>
+                <div
+                    id="character-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                ></div>
+            </section>
+
+            <section id="places" class="section-container p-6 mb-8 hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    Key Locations
+                </h2>
+                <div
+                    id="place-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                ></div>
+            </section>
+
+            <section
+                id="world-factions"
+                class="section-container p-6 mb-8 hidden"
+            >
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    World Lore & Factions
+                </h2>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="one-power"
+                    >
+                        <span>The One Power</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="one-power">
+                        <p class="mb-2">
+                            The One Power is the fundamental force driving the
+                            Wheel of Time, divided into male (*saidin*) and
+                            female (*saidar*) halves. *Saidin* is tainted by the
+                            Dark One, a corruption that drives male channelers
+                            to madness, a constant threat Rand grapples with
+                            throughout his journey. The book introduces new and
+                            powerful weaves, such as Skimming, a rapid method of
+                            travel.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="ter-angreal"
+                    >
+                        <span>Ter'angreal</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="ter-angreal">
+                        <p class="mb-2">
+                            These are objects imbued with the One Power,
+                            possessing a wide array of functions. The
+                            *ter'angreal* featured in *The Shadow Rising* are
+                            not merely magical tools but serve as critical plot
+                            devices that profoundly alter character arcs and
+                            reveal crucial lore, demonstrating how the Pattern
+                            itself guides events through these artifacts.
+                        </p>
+                        <h3 class="text-lg font-semibold mb-2">
+                            Significant Ter'angreal and Their Functions
+                        </h3>
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Ter'angreal Name</th>
+                                    <th>Type/Appearance</th>
+                                    <th>Location Found/Used</th>
+                                    <th>Primary Function</th>
+                                    <th>Key Characters Involved</th>
+                                    <th>Plot Impact/Significance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Doorframe Ter'angreal</td>
+                                    <td>Redstone arch</td>
+                                    <td>Stone of Tear</td>
+                                    <td>
+                                        Allows consultation with Aelfinn
+                                        (answers questions) and Eelfinn (bargain
+                                        for gifts)
+                                    </td>
+                                    <td>Rand, Mat, Moiraine</td>
+                                    <td>
+                                        Provides crucial prophecies/gifts,
+                                        setting characters on their paths (Mat's
+                                        Rhuidean imperative, Moiraine's
+                                        foresight, Mat's new abilities)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Glass Columns</td>
+                                    <td>Mysterious glass columns</td>
+                                    <td>Rhuidean</td>
+                                    <td>
+                                        Allows user to relive ancestral
+                                        memories, revealing Aiel history
+                                    </td>
+                                    <td>Rand</td>
+                                    <td>
+                                        Rand learns the true history of the
+                                        Aiel, validating his identity as
+                                        Car'a'carn and providing the knowledge
+                                        to challenge Couladin
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Male A'dam (Domination Bands)</td>
+                                    <td>Two bracelets, possibly a collar</td>
+                                    <td>Panarch's museum (Tanchico)</td>
+                                    <td>
+                                        Designed to control male channelers
+                                        (requires two female channelers)
+                                    </td>
+                                    <td>Nynaeve, Elayne, Egeanin</td>
+                                    <td>
+                                        Represents a major threat to Rand;
+                                        Nynaeve and Elayne's mission to prevent
+                                        its use by the Black Ajah
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Foxhead Medallion</td>
+                                    <td>Medallion</td>
+                                    <td>Rhuidean (received from Eelfinn)</td>
+                                    <td>Protects bearer from the One Power</td>
+                                    <td>Mat</td>
+                                    <td>
+                                        Provides Mat with crucial defense
+                                        against channelers, enabling his future
+                                        roles and adventures
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="world-of-dreams"
+                    >
+                        <span>The World of Dreams (Tel'aran'rhiod)</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="world-of-dreams">
+                        <p class="mb-2">
+                            A shared dream world that can be entered and
+                            manipulated by powerful dreamwalkers. Egwene begins
+                            her intensive training to master this realm, while
+                            Perrin utilizes it to scout and communicate with
+                            wolves. The mysterious Slayer also operates within
+                            *Tel'aran'rhiod*, hunting wolves.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="aiel-history"
+                    >
+                        <span>Aiel History and Culture</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="aiel-history">
+                        <p class="mb-2">
+                            The book provides an extensive exploration of Aiel
+                            history, revealing their ancient past.
+                        </p>
+                        <ul class="list-disc pl-5 mb-2">
+                            <li>
+                                <strong>The Way of the Leaf:</strong> The
+                                original philosophy of the Aiel, known as the
+                                Da'shain Aiel ("People Dedicated to Peace"), who
+                                were pacifists and servants of the Aes Sedai
+                                during the Age of Legends. They were entrusted
+                                with safeguarding a vast collection of
+                                Power-wrought objects during the Breaking of the
+                                World.
+                            </li>
+                            <li>
+                                <strong>Jenn Aiel:</strong> A specific group of
+                                Da'shain Aiel who strictly adhered to the Way of
+                                the Leaf and constructed Rhuidean to protect the
+                                entrusted items. This group eventually died out.
+                            </li>
+                            <li>
+                                <strong
+                                    >Origins of the Clans and Tinkers:</strong
+                                >
+                                During the chaos of the Breaking, the Da'shain
+                                Aiel fractured. Some abandoned the Way of the
+                                Leaf, taking up arms to protect themselves,
+                                thereby becoming the warrior Aiel clans of the
+                                Waste. Others, while maintaining pacifism,
+                                believed the Aes Sedai had failed them, leading
+                                them to become the traveling Tuatha'an, or
+                                Tinkers. The Aiel's current warrior identity is
+                                thus a brutal adaptation, a departure from their
+                                core, pacifist origins, and their
+                                self-perception of the Waste as a "punishment"
+                                is recontextualized as an atonement for
+                                abandoning the Way of the Leaf.
+                            </li>
+                            <li>
+                                <strong>*Ji'e'toh*:</strong> The complex Aiel
+                                concept of honor and obligation, which dictates
+                                their actions and relationships, is further
+                                explored.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="antagonistic-factions"
+                    >
+                        <span>Antagonistic Forces & Factions</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="antagonistic-factions">
+                        <ul class="list-disc pl-5 mb-2">
+                            <li>
+                                <strong>The Forsaken:</strong> Lanfear,
+                                Asmodean, Moghedien, Sammael, and Rahvin are
+                                actively involved, demonstrating their strategic
+                                cunning and direct threat to the protagonists.
+                            </li>
+                            <li>
+                                <strong>Padan Fain:</strong> A renegade
+                                Darkfriend who merged with Mordeth, driven by an
+                                insane hatred for Rand, Mat, and Perrin. He
+                                actively manipulates events in the Two Rivers,
+                                leading Trollocs and Whitecloaks.
+                            </li>
+                            <li>
+                                <strong>Slayer:</strong> A mysterious and
+                                dangerous agent of the Shadow, a merged being
+                                composed of Isam Mandragoran (Lan's cousin) and
+                                Luc Mantear (Rand's uncle). He hunts wolves in
+                                *Tel'aran'rhiod* and is involved in the conflict
+                                in the Two Rivers.
+                            </li>
+                            <li>
+                                <strong>Couladin:</strong> The ambitious chief
+                                of the Shaido Aiel, attempts to usurp Rand's
+                                prophesied role as "He Who Comes With the Dawn".
+                            </li>
+                            <li>
+                                <strong>Elaida a'Roihan:</strong> A powerful and
+                                ambitious Red Ajah Aes Sedai, orchestrates the
+                                coup in the White Tower, deposing Siuan Sanche
+                                and becoming the new Amyrlin Seat. She is
+                                characterized by her harshness, control, and
+                                lack of empathy, and is unknowingly manipulated
+                                by the Black Ajah and Rahvin.
+                            </li>
+                            <li>
+                                <strong
+                                    >Whitecloaks (Children of the
+                                    Light):</strong
+                                >
+                                A military-religious organization that hunts
+                                channelers and Darkfriends, often causing more
+                                harm than good due to their fanaticism and
+                                misguided beliefs. They are a significant
+                                antagonistic force in the Two Rivers.
+                            </li>
+                            <li>
+                                <strong>Trollocs and Myrddraal:</strong> The
+                                monstrous foot soldiers and their terrifying
+                                commanders, respectively, of the Shadow. They
+                                attack the Stone of Tear and the Two Rivers.
+                            </li>
+                            <li>
+                                <strong>Black Ajah:</strong> A secret society of
+                                Aes Sedai who serve the Dark One, actively
+                                working to undermine the Light from within the
+                                White Tower and across the world.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="prophecies" class="section-container p-6 mb-8 hidden">
+                <h2 class="text-2xl font-semibold mb-4 text-amber-700">
+                    Prophecies of the Dragon
+                </h2>
+                <p class="mb-4">
+                    These ancient prophecies detail the return of the Dragon
+                    Reborn and his pivotal role in the Last Battle, serving as a
+                    guiding force for Rand's actions and destiny. Though often
+                    vague, they are a driving force that shapes the narrative.
+                </p>
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="prophecy-rhuidean"
+                    >
+                        <span>Prophecy of Rhuidean and the Aiel</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="prophecy-rhuidean">
+                        <p class="mb-2">
+                            Rand's journey to the Aiel Waste is driven by the
+                            prophecy of "He Who Comes With the Dawn" (the
+                            Car'a'carn), who will lead the Aiel and reveal their
+                            true history. His emergence from the glass columns
+                            in Rhuidean with dragon markings on both arms, and
+                            his revelation of the Aiel's pacifist origins,
+                            directly fulfill this prophecy. This act is crucial
+                            for Rand to be acknowledged as the Aiel's leader and
+                            for the Aiel to confront their foundational
+                            identity.
+                        </p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="prophecy-mat"
+                    >
+                        <span>Mat's Prophecies from the Aelfinn</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="prophecy-mat">
+                        <p class="mb-2">
+                            Mat's encounter with the Aelfinn in Tear provides
+                            him with a dire warning: he must journey to Rhuidean
+                            or face death. He is also prophesied to marry "the
+                            Daughter of the Nine Moons." His subsequent bargain
+                            with the Eelfinn in Rhuidean, though seemingly
+                            accidental, equips him with the Old Tongue, memories
+                            of past lives (making him a military strategist), an
+                            *ashandarei* spear, and a medallion *ter'angreal*
+                            that protects him from the One Power (the foxhead
+                            medallion). The price for these gifts is a symbolic
+                            hanging from the Tree of Life (Avendesora), leaving
+                            him with a permanently scarred neck. This seemingly
+                            accidental bargain is a pivotal moment that
+                            irrevocably alters Mat's destiny. The gifts he
+                            receives, particularly the new memories of past
+                            lives, are crucial for his future role in the Last
+                            Battle and beyond.
+                        </p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="prophecy-asmodean"
+                    >
+                        <span>Asmodean as Teacher</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="prophecy-asmodean">
+                        <p class="mb-2">
+                            A prophecy states that Rand will be taught to wield
+                            the One Power by one of the Forsaken without it
+                            killing him. Lanfear forces Asmodean into this role
+                            after Rand severs his link to the Dark One,
+                            establishing a dangerous but necessary
+                            teacher-student dynamic for Rand's survival and
+                            growth as a channeler.
+                        </p>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div
+                        class="collapsible-header"
+                        data-collapsible-target="prophecy-general"
+                    >
+                        <span>General Significance</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="collapsible-content" id="prophecy-general">
+                        <p class="mb-2">
+                            The Prophecies of the Dragon serve as a constant
+                            underlying current, guiding the actions of many
+                            characters, particularly Rand. They provide a
+                            framework for the unfolding epic, hinting at future
+                            events and reinforcing the idea that the Wheel of
+                            Time weaves the Pattern as it wills, often through
+                            seemingly coincidental or fated occurrences.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div
+            id="character-modal"
+            class="modal fixed inset-0 flex items-center justify-center p-4 hidden"
+        >
+            <div class="modal-content w-full max-w-2xl p-6 relative">
+                <button
+                    class="close-button absolute top-4 right-4"
+                    id="close-character-modal"
+                >
+                    &times;
+                </button>
+                <h3
+                    id="modal-character-name"
+                    class="text-3xl font-bold mb-4 text-amber-800"
+                ></h3>
+                <p class="mb-2">
+                    <strong class="text-amber-700">Primary Location:</strong>
+                    <span id="modal-character-location"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Key Motivations/Goals:</strong
+                    >
+                    <span id="modal-character-motivations"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Major Events/Developments:</strong
+                    >
+                    <span id="modal-character-events"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Significant Relationships:</strong
+                    >
+                    <span id="modal-character-relationships"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700">Description:</strong>
+                    <span id="modal-character-description"></span>
+                </p>
+            </div>
+        </div>
+
+        <div
+            id="place-modal"
+            class="modal fixed inset-0 flex items-center justify-center p-4 hidden"
+        >
+            <div class="modal-content w-full max-w-2xl p-6 relative">
+                <button
+                    class="close-button absolute top-4 right-4"
+                    id="close-place-modal"
+                >
+                    &times;
+                </button>
+                <h3
+                    id="modal-place-name"
+                    class="text-3xl font-bold mb-4 text-amber-800"
+                ></h3>
+                <p class="mb-2">
+                    <strong class="text-amber-700">General Description:</strong>
+                    <span id="modal-place-description"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Geographical Features:</strong
+                    >
+                    <span id="modal-place-features"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Cultural/Plot Significance:</strong
+                    >
+                    <span id="modal-place-significance"></span>
+                </p>
+                <p class="mb-2">
+                    <strong class="text-amber-700"
+                        >Key Events Occurring There:</strong
+                    >
+                    <span id="modal-place-events"></span>
+                </p>
+            </div>
+        </div>
+
+        <script>
+            // Data for Characters
+            const characters = [
+                {
+                    id: "rand",
+                    name: "Rand al'Thor",
+                    primaryLocation: "Aiel Waste",
+                    motivations:
+                        "Fulfill prophecies as Dragon Reborn; understand Aiel heritage; learn to wield One Power",
+                    majorEvents:
+                        "Enters glass columns in Rhuidean, relives Aiel history, emerges as Car'a'carn; confronts Couladin at Alcair Dal; battles Asmodean, forces him to be teacher; learns Skimming",
+                    relationships:
+                        "Moiraine (strained mentor-protégé), Aviendha (growing attraction/teacher), Lanfear (manipulative adversary), Asmodean (forced teacher)",
+                    description:
+                        "Rand's journey to the Aiel Waste and his profound experience within Rhuidean are central to his expansion. His reliving of Aiel history, revealing their pacifist origins, not only validates his identity as the Car'a'carn but also places upon him the immense burden of reconciling a people with a past that contradicts their present. This revelation shatters a foundational cultural myth, forcing the Aiel to confront their true heritage and the reasons for their current warrior culture, setting the stage for future conflicts and transformations within their society.",
+                },
+                {
+                    id: "mat",
+                    name: "Mat Cauthon",
+                    primaryLocation: "Aiel Waste",
+                    motivations:
+                        "Escape Rand's ta'veren pull; seek answers (initially); avoid responsibility",
+                    majorEvents:
+                        "Prophecied to go to Rhuidean or die; enters Eelfinn ter'angreal, makes bargain, gains Old Tongue, past lives' memories, ashandarei, foxhead medallion; hung from Tree of Life",
+                    relationships:
+                        "Aelfinn/Eelfinn (fateful bargainers); 'Daughter of the Nine Moons' (prophesied spouse)",
+                    description:
+                        "Mat's fateful bargain with the Eelfinn, though seemingly accidental, irrevocably alters his destiny, equipping him with crucial skills and defenses that will be indispensable for his future leadership roles. This transformation, though born from a misstep, equips him with the unique skills and defenses necessary for his future role in the Last Battle, highlighting the unpredictable and often dangerous nature of interacting with ancient powers and the subtle ways the Pattern guides individuals towards their roles. Mat begins to embrace his extraordinary luck and the knowledge of his past lives, shifting from a reluctant companion to a figure destined for leadership. His character is deeply influenced by Norse mythology, particularly Odin, evidenced by his wide-brimmed hat, the ravens on his spear, and his later eye sacrifice. He also develops a strong distrust of Aes Sedai.",
+                },
+                {
+                    id: "perrin",
+                    name: "Perrin Aybara",
+                    primaryLocation: "The Two Rivers",
+                    motivations:
+                        "Protect his people; avenge family; embrace wolfbrother nature; resist leadership",
+                    majorEvents:
+                        "Family murdered by Trollocs; rallies villagers against Trollocs/Whitecloaks; battles Slayer in Tel'aran'rhiod; marries Faile; leads defense of Emond's Field",
+                    relationships:
+                        "Faile (wife, ally); Loial (loyal companion); Gaul (Aiel ally); Aram (Tinker ally); Slayer (wolf-hunting adversary); Wolves (deepening connection)",
+                    description:
+                        "Perrin's return to the Two Rivers provides a contained yet comprehensive illustration of the burdens of leadership, as he transforms from a reluctant village boy into a decisive commander, battling both Shadowspawn and misguided allies. This arc showcases Perrin's profound transformation from a gentle, hesitant village boy to a decisive, albeit reluctant, commander, demonstrating that heroism can emerge from unexpected places and through personal sacrifice, and that leadership often means adapting to dire circumstances with unreliable allies.",
+                },
+                {
+                    id: "egwene",
+                    name: "Egwene al'Vere",
+                    primaryLocation: "Aiel Waste",
+                    motivations:
+                        "Track Black Ajah (initially); master Dreamwalking",
+                    majorEvents:
+                        "Interrogates Black Ajah; receives Amys's instruction to go to Waste; begins intensive dreamwalker training in Rhuidean",
+                    relationships:
+                        "Amys (Wise One mentor); Elayne (friend, rival for Rand's affection)",
+                    description:
+                        "Egwene demonstrates rapid growth in her power and mastery of the World of Dreams, quickly becoming a formidable figure in her own right. She is characterized by her determination, strong desire to learn, and ambition.",
+                },
+                {
+                    id: "nynaeve",
+                    name: "Nynaeve al'Meara",
+                    primaryLocation: "Tarabon (Tanchico)",
+                    motivations:
+                        "Hunt Black Ajah; prevent male a'dam acquisition",
+                    majorEvents:
+                        "Sails to Tanchico with Elayne; encounters Moghedien, duels and wins; recovers male a'dam; meets Birgitte in Tel'aran'rhiod",
+                    relationships:
+                        "Elayne (friend, co-missionary); Thom Merrilin (protector); Juilin Sandar (protector); Bayle Domon (ally); Egeanin (Seanchan ally); Moghedien (Forsaken adversary); Birgitte Silverbow (Hero of the Horn, bonded by Elayne)",
+                    description:
+                        "Nynaeve continues to develop her formidable healing prowess and unwavering determination. Her mission in Tanchico exposes the pervasive reach of the Black Ajah and the strategic threat posed by the Forsaken, particularly their efforts to acquire the male a'dam to control male channelers. Her accelerated development and ability to contend with formidable adversaries underscore her growing importance to the Light.",
+                },
+                {
+                    id: "elayne",
+                    name: "Elayne Trakand",
+                    primaryLocation: "Tarabon (Tanchico)",
+                    motivations:
+                        "Hunt Black Ajah; prevent male a'dam acquisition",
+                    majorEvents:
+                        "Sails to Tanchico with Nynaeve; encounters Moghedien; rescues Panarch Amathera; bonds Birgitte as Warder to save her life",
+                    relationships:
+                        "Nynaeve (friend, co-missionary); Egwene (friend, discusses Rand); Thom Merrilin (protector); Juilin Sandar (protector); Bayle Domon (ally); Egeanin (Seanchan ally); Moghedien (Forsaken adversary); Birgitte Silverbow (bonded Warder)",
+                    description:
+                        "Elayne grows in strength and begins to grapple with her royal duties, preparing for future leadership. Her mission in Tanchico exposes the pervasive reach of the Black Ajah and the strategic threat posed by the Forsaken, particularly their efforts to acquire the male a'dam to control male channelers. Her accelerated development and ability to contend with formidable adversaries underscore her growing importance to the Light.",
+                },
+            ];
+
+            // Data for Places
+            const places = [
+                {
+                    id: "stone-of-tear",
+                    name: "The Stone of Tear",
+                    generalDescription:
+                        "An ancient, legendary fortress once considered impregnable.",
+                    geographicalFeatures: "Invulnerable by legend",
+                    culturalSignificance: "Rand's initial seat of power",
+                    keyEvents:
+                        "'Bubble of evil' strikes; Trolloc attack; Rand uses Callandor; Aelfinn ter'angreal visit",
+                },
+                {
+                    id: "aiel-waste",
+                    name: "The Aiel Waste (The Three-Fold Land)",
+                    generalDescription:
+                        "A vast, mysterious, and largely unmapped territory.",
+                    geographicalFeatures:
+                        "Rocky hills, broken formations, mountains; akin to Arizona/Grand Canyon",
+                    culturalSignificance:
+                        "Homeland of the Aiel; proving ground for their identity",
+                    keyEvents:
+                        "Rand's journey to be acknowledged as Car'a'carn; Aiel history revealed",
+                },
+                {
+                    id: "rhuidean",
+                    name: "Rhuidean",
+                    generalDescription:
+                        "Sacred, legendary city, not inhabited.",
+                    geographicalFeatures:
+                        "Valley below Chaendaer mountain, surrounded by jagged peaks",
+                    culturalSignificance:
+                        "Site for Aiel chiefs/Wise Ones to learn true history via glass columns; holds ter'angreal",
+                    keyEvents:
+                        "Rand's reliving of Aiel history; Mat's Eelfinn bargain; Rand battles Asmodean",
+                },
+                {
+                    id: "alcair-dal",
+                    name: "Alcair Dal",
+                    generalDescription: "Circular, bowl-like canyon.",
+                    geographicalFeatures:
+                        "'The Golden Bowl' (Old Tongue); high jagged mountains visible",
+                    culturalSignificance:
+                        "Primary meeting place for Aiel clans due to acoustics",
+                    keyEvents:
+                        "Rand's confrontation with Couladin; Rand reveals Aiel history; Rand makes it rain",
+                },
+                {
+                    id: "cold-rocks-hold",
+                    name: "Cold Rocks Hold",
+                    generalDescription: "Aiel settlement.",
+                    geographicalFeatures: "Canyon-nested",
+                    culturalSignificance: "Home of Rhuarc's sept",
+                    keyEvents:
+                        "Rand assigned Aviendha as teacher; Trolloc attack; Rand gains Far Dareis Mai bodyguard",
+                },
+                {
+                    id: "imre-stand",
+                    name: "Imre Stand",
+                    generalDescription: "Small watering hole.",
+                    geographicalFeatures: "On Taardad land, near Chaendaer",
+                    culturalSignificance: "Vital resource in the arid Waste",
+                    keyEvents: "Watering spot for Rand's party",
+                },
+                {
+                    id: "two-rivers",
+                    name: "The Two Rivers",
+                    generalDescription: "Perrin's remote homeland.",
+                    geographicalFeatures:
+                        "Rural villages (Emond's Field, Watch Hill, Deven Ride)",
+                    culturalSignificance:
+                        "Becomes a microcosm of the larger war against the Shadow",
+                    keyEvents:
+                        "Perrin's family murdered; Whitecloak presence; Trolloc attacks; Perrin rallies locals; Perrin marries Faile",
+                },
+                {
+                    id: "tarabon-tanchico",
+                    name: "Tarabon (Tanchico)",
+                    generalDescription: "Bustling port city.",
+                    geographicalFeatures: "Coastal city",
+                    culturalSignificance:
+                        "Black Ajah stronghold; target for male a'dam acquisition",
+                    keyEvents:
+                        "Nynaeve & Elayne's mission; encounters with Moghedien, Egeanin, Domon; Panarch rescue; male a'dam secured",
+                },
+                {
+                    id: "tar-valon",
+                    name: "Tar Valon (The White Tower)",
+                    generalDescription:
+                        "The global seat of power for the Aes Sedai.",
+                    geographicalFeatures: "Island city, central tower",
+                    culturalSignificance:
+                        "Center of female channeling; political intrigue",
+                    keyEvents:
+                        "Siuan Sanche deposed and stilled; Elaida's coup; Black Ajah infiltration",
+                },
+            ];
+
+            // Get elements
+            const navButtons = document.querySelectorAll(".nav-link");
+            const sections = document.querySelectorAll("main section");
+            const collapsibleHeaders = document.querySelectorAll(
+                ".collapsible-header",
+            );
+
+            const characterGrid = document.getElementById("character-grid");
+            const characterModal = document.getElementById("character-modal");
+            const closeCharacterModalBtn = document.getElementById(
+                "close-character-modal",
+            );
+            const modalCharacterName = document.getElementById(
+                "modal-character-name",
+            );
+            const modalCharacterLocation = document.getElementById(
+                "modal-character-location",
+            );
+            const modalCharacterMotivations = document.getElementById(
+                "modal-character-motivations",
+            );
+            const modalCharacterEvents = document.getElementById(
+                "modal-character-events",
+            );
+            const modalCharacterRelationships = document.getElementById(
+                "modal-character-relationships",
+            );
+            const modalCharacterDescription = document.getElementById(
+                "modal-character-description",
+            );
+
+            const placeGrid = document.getElementById("place-grid");
+            const placeModal = document.getElementById("place-modal");
+            const closePlaceModalBtn =
+                document.getElementById("close-place-modal");
+            const modalPlaceName = document.getElementById("modal-place-name");
+            const modalPlaceDescription = document.getElementById(
+                "modal-place-description",
+            );
+            const modalPlaceFeatures = document.getElementById(
+                "modal-place-features",
+            );
+            const modalPlaceSignificance = document.getElementById(
+                "modal-place-significance",
+            );
+            const modalPlaceEvents =
+                document.getElementById("modal-place-events");
+
+            // --- Navigation Logic ---
+            navButtons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    const targetSectionId = button.dataset.section;
+
+                    // Remove active class from all buttons
+                    navButtons.forEach((btn) => btn.classList.remove("active"));
+                    // Add active class to clicked button
+                    button.classList.add("active");
+
+                    // Hide all sections
+                    sections.forEach((section) =>
+                        section.classList.add("hidden"),
+                    );
+                    // Show the target section
+                    document
+                        .getElementById(targetSectionId)
+                        .classList.remove("hidden");
+
+                    // Scroll to top of the new section
+                    window.scrollTo({
+                        top:
+                            document.getElementById(targetSectionId).offsetTop -
+                            document.querySelector("header").offsetHeight,
+                        behavior: "smooth",
+                    });
+                });
+            });
+
+            // --- Collapsible Logic ---
+            collapsibleHeaders.forEach((header) => {
+                header.addEventListener("click", () => {
+                    const targetId = header.dataset.collapsibleTarget;
+                    const content = document.getElementById(targetId);
+                    const arrow = header.querySelector(".arrow");
+
+                    if (content.classList.contains("open")) {
+                        content.classList.remove("open");
+                        arrow.innerHTML = "&#9660;"; // Down arrow
+                    } else {
+                        content.classList.add("open");
+                        arrow.innerHTML = "&#9650;"; // Up arrow
+                    }
+                });
+            });
+
+            // --- Character Card Generation ---
+            function renderCharacterCards() {
+                characterGrid.innerHTML = ""; // Clear existing cards
+                characters.forEach((character) => {
+                    const card = document.createElement("div");
+                    card.classList.add(
+                        "card",
+                        "p-4",
+                        "flex",
+                        "flex-col",
+                        "items-center",
+                        "text-center",
+                    );
+                    card.dataset.characterId = character.id;
+                    card.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">${character.name}</h3>
+                    <p class="text-sm text-stone-600">${character.primaryLocation}</p>
+                `;
+                    card.addEventListener("click", () =>
+                        openCharacterModal(character),
+                    );
+                    characterGrid.appendChild(card);
+                });
+            }
+
+            // --- Character Modal Logic ---
+            function openCharacterModal(character) {
+                modalCharacterName.textContent = character.name;
+                modalCharacterLocation.textContent = character.primaryLocation;
+                modalCharacterMotivations.textContent = character.motivations;
+                modalCharacterEvents.textContent = character.majorEvents;
+                modalCharacterRelationships.textContent =
+                    character.relationships;
+                modalCharacterDescription.textContent = character.description;
+                characterModal.classList.remove("hidden");
+            }
+
+            closeCharacterModalBtn.addEventListener("click", () => {
+                characterModal.classList.add("hidden");
+            });
+
+            characterModal.addEventListener("click", (e) => {
+                if (e.target === characterModal) {
+                    characterModal.classList.add("hidden");
+                }
+            });
+
+            // --- Place Card Generation ---
+            function renderPlaceCards() {
+                placeGrid.innerHTML = ""; // Clear existing cards
+                places.forEach((place) => {
+                    const card = document.createElement("div");
+                    card.classList.add(
+                        "card",
+                        "p-4",
+                        "flex",
+                        "flex-col",
+                        "items-center",
+                        "text-center",
+                    );
+                    card.dataset.placeId = place.id;
+                    card.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-2 text-amber-700">${place.name}</h3>
+                    <p class="text-sm text-stone-600">${place.generalDescription}</p>
+                `;
+                    card.addEventListener("click", () => openPlaceModal(place));
+                    placeGrid.appendChild(card);
+                });
+            }
+
+            // --- Place Modal Logic ---
+            function openPlaceModal(place) {
+                modalPlaceName.textContent = place.name;
+                modalPlaceDescription.textContent = place.generalDescription;
+                modalPlaceFeatures.textContent = place.geographicalFeatures;
+                modalPlaceSignificance.textContent = place.culturalSignificance;
+                modalPlaceEvents.textContent = place.keyEvents;
+                placeModal.classList.remove("hidden");
+            }
+
+            closePlaceModalBtn.addEventListener("click", () => {
+                placeModal.classList.add("hidden");
+            });
+
+            placeModal.addEventListener("click", (e) => {
+                if (e.target === placeModal) {
+                    placeModal.classList.add("hidden");
+                }
+            });
+
+            // Initial rendering on page load
+            document.addEventListener("DOMContentLoaded", () => {
+                renderCharacterCards();
+                renderPlaceCards();
+            });
+        </script>
     </body>
 </html>
