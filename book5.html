@@ -1,10 +1,1285 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
-        <title>Book 5</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>The Fires of Heaven - Interactive Summary</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Visualization & Content Choices:
+        - Overview: Text block. Goal: Inform. Method: Static HTML. Interaction: None. Justification: Provides initial context.
+        - Story: Nested collapsibles (main plot points as primary, paragraphs/sub-sections as secondary). Goal: Inform, Organize. Method: HTML + JS for toggles. Interaction: Click to expand/collapse. Justification: Manages large narrative text effectively, allows users to focus on parts of the story, and ensures all content is immediately visible upon expansion. All source text included.
+        - Characters: Grid of cards opening modals. Goal: Inform, Organize, Detail on demand. Method: HTML + JS for dynamic modal content. Interaction: Click card to open modal. Justification: Presents a scannable list of characters, with details available without cluttering the main view.
+        - Places: Grid of cards opening modals. Goal: Inform, Organize, Detail on demand. Method: HTML + JS for dynamic modal content. Interaction: Click card to open modal. Justification: Similar to characters, allows easy browsing of locations.
+        - World & Factions: Collapsibles for magical constructs and for cultures/factions. Goal: Inform, Organize. Method: HTML + JS for toggles. Interaction: Click to expand/collapse. Justification: Organizes complex lore into digestible pieces.
+        - Prophecies: Text block, key phrases possibly highlighted. Goal: Inform. Method: Static HTML. Interaction: None. Justification: Presents key thematic elements directly.
+        - No Chart.js/Plotly.js needed as the source is purely narrative text. Graphics will be Unicode characters for icons.
+        - Library/Method: Vanilla JavaScript for all interactions. Tailwind CSS for styling.
+    -->
+        <style>
+            :root {
+                --color-bg-main: #fbf5e8; /* Lighter Pale Sand/Ivory */
+                --color-bg-card: #fffdf5; /* Very Light Cornsilk/Off-white */
+                --color-bg-modal: #fffcf0; /* Slightly warmer than card */
+                --color-bg-header: #eaddca; /* Light Tan/Beige */
+                --color-bg-collapsible-header: #f0e6d6; /* Slightly darker than main bg for collapsible headers */
+                --color-text-main: #4a3b31; /* Darker Brown */
+                --color-text-heading: #8c5a3b; /* Muted Terracotta/Saddle Brown */
+                --color-text-subtle: #7d6b5c; /* Greyish Brown */
+                --color-accent-gold: #c8a051; /* Softer Gold */
+                --color-accent-red: #b07050; /* Muted Sienna */
+                --color-border: #d4c8b8; /* Light Greyish Beige */
+                --color-interactive: #b8860b; /* DarkGoldenRod */
+                --color-interactive-hover: #af7a0a; /* Darker GoldenRod */
+                --color-shadow: rgba(0, 0, 0, 0.1);
+            }
+            body {
+                font-family: "Inter", sans-serif;
+                background-color: var(--color-bg-main);
+                color: var(--color-text-main);
+            }
+            /* Removed smooth scroll as we are now using tabs */
+            /* html {
+            scroll-behavior: smooth;
+        } */
+            /* Custom scrollbar for a more integrated look */
+            ::-webkit-scrollbar {
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: var(--color-bg-header);
+            }
+            ::-webkit-scrollbar-thumb {
+                background-color: var(--color-text-subtle);
+                border-radius: 10px;
+                border: 2px solid var(--color-bg-header);
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background-color: var(--color-interactive);
+            }
+
+            .active-nav {
+                color: var(--color-accent-gold) !important;
+                font-weight: 600;
+                border-bottom: 2px solid var(--color-accent-gold);
+            }
+            .collapsible-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.5s ease-in-out;
+            }
+            .collapsible-content.open {
+                max-height: 99999px; /* A very large value to ensure content is not trimmed */
+            }
+            .chevron::before {
+                content: "▼"; /* Down arrow */
+                display: inline-block;
+                margin-right: 0.5em;
+                transition: transform 0.3s ease-in-out;
+                font-size: 0.8em;
+            }
+            .open .chevron::before {
+                transform: rotate(-180deg); /* Up arrow */
+            }
+            .modal {
+                transition:
+                    opacity 0.3s ease-in-out,
+                    visibility 0.3s ease-in-out;
+            }
+            .modal-content {
+                transition: transform 0.3s ease-in-out;
+            }
+            /* Adding some font styles for headings if Inter is not loaded by Tailwind by default */
+            h1,
+            h2,
+            h3,
+            h4 {
+                font-family:
+                    "Georgia", serif; /* A more literary feel for headings */
+                color: var(--color-text-heading);
+            }
+            .prose p {
+                margin-bottom: 1em;
+                line-height: 1.7;
+            }
+            .prose h3 {
+                margin-top: 1.5em;
+                margin-bottom: 0.5em;
+                font-size: 1.25em;
+            }
+            .prose ul {
+                list-style-type: disc;
+                margin-left: 1.5em;
+                margin-bottom: 1em;
+            }
+            .prose li {
+                margin-bottom: 0.5em;
+            }
+
+            .card {
+                background-color: var(--color-bg-card);
+                border: 1px solid var(--color-border);
+                border-radius: 0.75rem; /* 12px */
+                padding: 1.5rem; /* 24px */
+                box-shadow:
+                    0 4px 6px -1px var(--color-shadow),
+                    0 2px 4px -1px var(--color-shadow);
+                transition:
+                    transform 0.2s ease-in-out,
+                    box-shadow 0.2s ease-in-out;
+            }
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow:
+                    0 10px 15px -3px var(--color-shadow),
+                    0 4px 6px -2px var(--color-shadow);
+            }
+            .modal-body-content > p {
+                margin-bottom: 0.75em;
+            }
+            .modal-body-content > h4 {
+                margin-top: 1em;
+                margin-bottom: 0.25em;
+                color: var(--color-text-heading);
+                font-weight: 600;
+            }
+
+            .btn {
+                background-color: var(--color-interactive);
+                color: var(--color-bg-main);
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                font-weight: 500;
+                transition: background-color 0.2s ease-in-out;
+            }
+            .btn:hover {
+                background-color: var(--color-interactive-hover);
+            }
+            .btn-secondary {
+                background-color: var(--color-bg-card);
+                color: var(--color-interactive);
+                border: 1px solid var(--color-interactive);
+            }
+            .btn-secondary:hover {
+                background-color: var(--color-border);
+            }
+
+            /* Styles for tabbed content */
+            .tab-content {
+                display: none; /* Hidden by default */
+                padding-top: 2rem; /* Add some top padding as header is fixed */
+                padding-bottom: 2rem;
+            }
+            .tab-content.active {
+                display: block; /* Shown when active */
+            }
+        </style>
     </head>
-    <body>
-        <h1>Book 5</h1>
-        <p>Coming soon...</p>
+    <body class="antialiased leading-relaxed">
+        <header
+            class="sticky top-0 z-50 shadow-md"
+            style="background-color: var(--color-bg-header)"
+        >
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex-shrink-0">
+                        <h1
+                            class="text-2xl sm:text-3xl font-bold"
+                            style="color: var(--color-text-heading)"
+                        >
+                            The Fires of Heaven
+                        </h1>
+                    </div>
+                    <nav
+                        class="hidden md:flex space-x-6 lg:space-x-10 items-center"
+                    >
+                        <a
+                            href="#overview"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >Overview</a
+                        >
+                        <a
+                            href="#story"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >Story</a
+                        >
+                        <a
+                            href="#characters"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >Characters</a
+                        >
+                        <a
+                            href="#places"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >Places</a
+                        >
+                        <a
+                            href="#world"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >World & Factions</a
+                        >
+                        <a
+                            href="#prophecies"
+                            class="nav-link text-sm font-medium hover:text-[var(--color-accent-gold)] transition-colors duration-200 pb-1"
+                            style="color: var(--color-text-main)"
+                            >Prophecies</a
+                        >
+                    </nav>
+                    <div class="md:hidden">
+                        <button
+                            id="mobile-menu-button"
+                            class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--color-accent-gold)]"
+                            style="color: var(--color-text-main)"
+                        >
+                            <svg
+                                class="h-6 w-6"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16m-7 6h7"
+                                ></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div
+                id="mobile-menu"
+                class="md:hidden hidden pb-3 space-y-1 sm:px-3"
+                style="background-color: var(--color-bg-header)"
+            >
+                <a
+                    href="#overview"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >Overview</a
+                >
+                <a
+                    href="#story"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >Story</a
+                >
+                <a
+                    href="#characters"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >Characters</a
+                >
+                <a
+                    href="#places"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >Places</a
+                >
+                <a
+                    href
+                    href="#world"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >World & Factions</a
+                >
+                <a
+                    href="#prophecies"
+                    class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:bg-[var(--color-border)] hover:text-[var(--color-accent-gold)]"
+                    style="color: var(--color-text-main)"
+                    >Prophecies</a
+                >
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <section id="overview" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    Overview
+                </h2>
+                <div
+                    class="prose max-w-3xl mx-auto text-lg"
+                    style="color: var(--color-text-main)"
+                >
+                    <p>
+                        This interactive summary explores "The Fires of Heaven,"
+                        the fifth book in Robert Jordan's epic fantasy series,
+                        The Wheel of Time. It is a sprawling narrative that
+                        significantly advances several key plotlines, deepens
+                        character development, and expands upon the rich
+                        tapestry of its world.
+                    </p>
+                    <p>
+                        The story unfolds in a world where time is cyclical,
+                        represented by the Wheel of Time, which spins the
+                        Pattern of Ages using the lives of individuals as its
+                        threads. Certain individuals, known as
+                        <em>ta'veren</em>, are focal points in the Pattern,
+                        around whom the threads of destiny weave more tightly,
+                        influencing the lives of those around them.
+                    </p>
+                    <p>
+                        The driving force of the Wheel is the One Power, drawn
+                        from the True Source. This Power is divided into two
+                        halves: <em>saidin</em>, the male half, and
+                        <em>saidar</em>, the female half. They are different yet
+                        complementary. Ages ago, during the War of the Power
+                        against the Dark One (Shai'tan), Lews Therin Telamon,
+                        the Dragon, and his male channelers, the Hundred
+                        Companions, sealed the Dark One's prison. However, the
+                        Dark One's counterstroke tainted <em>saidin</em>,
+                        causing all male channelers to eventually go mad and
+                        die, leading to the Breaking of the World, a cataclysm
+                        that reshaped continents and ended the technologically
+                        advanced Age of Legends.
+                    </p>
+                    <p>
+                        The current era is the Third Age, an age of prophecy.
+                        The primary prophecy concerns the Dragon Reborn, the
+                        reincarnation of Lews Therin Telamon, who is destined to
+                        fight the Dark One at Tarmon Gai'don, the Last Battle.
+                        This figure is Rand al'Thor. The Forsaken (or "Chosen"
+                        as they call themselves) are thirteen of the most
+                        powerful channelers from the Age of Legends who swore
+                        allegiance to the Dark One. They were sealed in the Bore
+                        with their master but are now slowly breaking free.
+                    </p>
+                </div>
+            </section>
+
+            <section id="story" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    The Story Unfolds
+                </h2>
+                <p
+                    class="text-center max-w-2xl mx-auto mb-10"
+                    style="color: var(--color-text-subtle)"
+                >
+                    Explore the narrative of "The Fires of Heaven" in detail.
+                    Click on a main section to expand it, then click on
+                    individual paragraphs to reveal their content.
+                </p>
+                <div
+                    id="story-content"
+                    class="space-y-6 max-w-4xl mx-auto"
+                ></div>
+            </section>
+
+            <section id="characters" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    Key Characters
+                </h2>
+                <p
+                    class="text-center max-w-2xl mx-auto mb-10"
+                    style="color: var(--color-text-subtle)"
+                >
+                    Explore the pivotal figures shaping the events of "The Fires
+                    of Heaven." Click on a character's card to reveal more about
+                    their journey, relationships, and impact on the unfolding
+                    narrative.
+                </p>
+                <div
+                    id="characters-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
+                ></div>
+            </section>
+
+            <section id="places" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    Significant Locations
+                </h2>
+                <p
+                    class="text-center max-w-2xl mx-auto mb-10"
+                    style="color: var(--color-text-subtle)"
+                >
+                    Discover the key locations where the drama of "The Fires of
+                    Heaven" plays out. Each place holds unique significance and
+                    witnesses critical moments. Click on a location card for
+                    more details.
+                </p>
+                <div
+                    id="places-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+                ></div>
+            </section>
+
+            <section id="world" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    World & Factions
+                </h2>
+                <p
+                    class="text-center max-w-2xl mx-auto mb-10"
+                    style="color: var(--color-text-subtle)"
+                >
+                    Delve into the intricate tapestry of the world, its magical
+                    constructs, and the diverse cultures and factions vying for
+                    power or survival.
+                </p>
+                <div
+                    id="world-content"
+                    class="space-y-6 max-w-4xl mx-auto"
+                ></div>
+            </section>
+
+            <section id="prophecies" class="tab-content">
+                <h2
+                    class="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center"
+                >
+                    Prophecies and Destiny
+                </h2>
+                <div
+                    class="prose max-w-3xl mx-auto text-lg"
+                    style="color: var(--color-text-main)"
+                >
+                    <p>
+                        Prophecy is a dominant force in "The Fires of Heaven,"
+                        shaping actions, driving characters, and heralding
+                        monumental changes. The most significant are the
+                        Prophecies of the Dragon, foretelling the Dragon
+                        Reborn's coming and his destiny to face the Dark One at
+                        Tarmon Gai'don, the Last Battle.
+                    </p>
+                    <p>
+                        Rand al'Thor's existence as the Dragon Reborn is a
+                        constant affirmation of these prophecies. His every
+                        major act, from being proclaimed Car'a'carn by the Aiel
+                        to his confrontations with the Forsaken, is often viewed
+                        through the lens of what was foretold. The prophecies
+                        speak of the Dragon Reborn breaking the world again in
+                        his bid to save it, a heavy burden that weighs on Rand
+                        throughout the narrative.
+                    </p>
+                    <p>
+                        Other prophecies also weave through the story, such as
+                        those specific to the Aiel or visions seen by characters
+                        like Min Farshaw. These foretellings often bring both
+                        hope and dread, as characters grapple with the seemingly
+                        immutable nature of fate versus their own free will. The
+                        prophecies create an atmosphere of inevitability,
+                        highlighting the grand scale of the conflict and the
+                        pivotal roles individuals are destined to play.
+                    </p>
+                    <p>
+                        In "The Fires of Heaven," the impact of prophecy is
+                        palpable: it fuels the Shaido rebellion against Rand,
+                        influences the decisions of the Salidar Aes Sedai, and
+                        underscores the sacrifices made by characters like
+                        Moiraine Damodred. It is the invisible hand guiding the
+                        major currents of the story, pushing the world
+                        inexorably towards the Last Battle.
+                    </p>
+                </div>
+            </section>
+        </main>
+
+        <footer
+            class="py-8 mt-16 text-center"
+            style="
+                background-color: var(--color-bg-header);
+                color: var(--color-text-subtle);
+            "
+        >
+            <p class="text-sm">
+                &copy; 2025 Interactive Summary. Content based on "The Fires of
+                Heaven."
+            </p>
+        </footer>
+
+        <div
+            id="modal"
+            class="modal fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-70 invisible opacity-0 p-4"
+        >
+            <div
+                id="modal-content"
+                class="modal-content bg-[var(--color-bg-modal)] p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95"
+            >
+                <div class="flex justify-between items-center mb-4 sm:mb-6">
+                    <h3
+                        id="modal-title"
+                        class="text-2xl sm:text-3xl font-bold"
+                        style="color: var(--color-text-heading)"
+                    ></h3>
+                    <button
+                        id="close-modal"
+                        class="text-2xl hover:text-[var(--color-accent-red)] transition-colors duration-200"
+                        style="color: var(--color-text-subtle)"
+                    >
+                        &times;
+                    </button>
+                </div>
+                <div
+                    id="modal-body"
+                    class="prose max-w-none modal-body-content"
+                    style="color: var(--color-text-main)"
+                ></div>
+            </div>
+        </div>
+
+        <script>
+            const storyData = [
+                {
+                    title: "Echoes in Rhuidean and the Shaido Tide",
+                    paragraphs: [
+                        "In the heart of the Aiel Waste, within the sun-scorched, ancient city of Rhuidean, Rand al'Thor wrestled with the immense weight of his destiny. The title of Car'a'carn, chief of Aiel chiefs, rested uneasily upon his young shoulders. Each day was a battle against the encroaching whispers of Lews Therin Telamon, the Dragon of a bygone Age, whose memories and madness threatened to consume him. By his side, a shadow in the form of a tutor, the Forsaken Asmodean—captured, his power partially leashed, and cloaked in the guise of the unassuming gleeman Jasin Nata—imparted forbidden knowledge of the One Power. It was a perilous dance, a desperate pact for survival in a world rapidly descending into chaos.",
+                        "The fragile peace of this desert sanctuary was soon shattered. Dire portents arrived on the hot winds: Couladin, a charismatic Shaido chieftain with a false claim to the title of Car'a'carn, had ignited the fury of his clan. A crimson tide of Shaido warriors, swollen with allies, had surged across the towering Spine of the World, a wave of brutal conquest aimed at the unsuspecting \"treekiller\" lands of the west. Their passage was marked by pillage and slaughter, a brutal scar upon the land that demanded a response.",
+                        "With a heart heavy with foreboding, Rand gathered the Aiel clans who had sworn him fealty. A formidable host they were, yet their numbers were shadowed by the clans who remained undecided, and the open rebellion of the Shaido. Moiraine Damodred, her sapphire eyes reflecting a grim resolve, and her stoic Warder, Lan Mandragoran, steeled themselves for the arduous campaign ahead. Egwene al'Vere, her innate strength in the One Power blossoming under the stern guidance of the Aiel Wise Ones—Amys, Bair, and Melaine—found herself an integral part of this war party. Aviendha, a Maiden of the Spear, bound by the Wise Ones' decree to remain at Rand's side, to teach him the intricate customs of her people, fought a silent battle with her own burgeoning emotions and conflicting duties. And Mat Cauthon, ever the reluctant hero, his mind a chaotic repository of ancient battles and a gambler's desperate hunches, was once again swept into the maelstrom of a destiny he yearned to escape.",
+                    ],
+                },
+                {
+                    title: "Across the Dragonwall",
+                    paragraphs: [
+                        "Like a river of sand-hued warriors, the Aiel host flowed westward, leaving the desolate beauty of the Waste behind. The harsh, unforgiving landscape bore silent witness to the blossoming of an unexpected and tender love. Rand and Aviendha, thrust together by the capricious whims of the Pattern and the demands of their respective duties, found the initial friction between them slowly yielding to a profound, passionate connection. Despite Aviendha's fierce independence, her deeply ingrained loyalty to Elayne—whom she considered a near-sister after their shared visions in Rhuidean—and the vast cultural chasm that separated their worlds, their hearts became irrevocably intertwined. Their love was a fragile, precious bloom in a world teetering on the precipice of darkness, yet it became a source of intense internal conflict for the young Maiden, torn between desire and honor.",
+                        "Mat Cauthon, meanwhile, continued his uneasy waltz with fate. The spectral memories of long-dead generals whispered strategies in his mind, his ashandarei felt like a natural extension of his soul, and his uncanny luck, as always, defied all logic and probability. His path, however, was not without its own shadows. He found himself entangled with Melindhra, a Shaido Maiden whose dark, knowing eyes held secrets. She was a viper in their midst, a covert agent of the Forsaken Sammael, her presence a subtle, insidious poison seeping into the heart of Rand's camp.",
+                    ],
+                },
+                {
+                    title: "A World Unraveling: Journeys and Dreams",
+                    paragraphs: [
+                        "Far from the searing heat of the Aiel pursuit, in the ostensibly more civilized lands of the west, Nynaeve al'Meara and Elayne Trakand embarked on their own perilous odyssey. Guarded by the worldly wisdom of Thom Merrilin and the steadfast loyalty of Juilin Sandar, they set forth from the city of Tanchico, their initial destination the distant, legendary White Tower of Tar Valon. But the world they had known was rapidly unraveling. News, sharp as a shard of glass, reached them: Siuan Sanche, the Amyrlin Seat, the very bedrock of Aes Sedai authority, had been overthrown in a brutal coup, her connection to the True Source savagely severed. Elaida do Avriny a'Roihan, a formidable and ambitious sister of the Red Ajah, had seized the Amyrlin's stole, and the White Tower, for millennia a beacon of unity and strength, now stood fractured, a house divided against itself. This calamitous revelation shattered their plans and cast them adrift in a sea of uncertainty. Hunted by Elaida's implacable agents and stalked by the insidious Forsaken Moghedien, known as the Spider for her mastery of shadowy intrigue, Nynaeve and Elayne were driven into the clandestine world of fugitives. Their journey became a desperate flight, compelling them to seek refuge in the unlikeliest of sanctuaries: Valan Luca's garish, boisterous travelling menagerie. Under the guise of performers, they navigated the treacherous roads of Ghealdan and Amadicia, Nynaeve wrestling with the frustrating mental block that only allowed her to channel the One Power when consumed by rage, while Elayne, with quiet focus and determination, diligently honed her considerable skills, her rare and precious talent for the creation of ter'angreal proving to be an invaluable asset.",
+                        "The ethereal, shifting landscape of Tel'aran'rhiod, the World of Dreams, became their clandestine meeting place. Through the shimmering, insubstantial gateways of ter'angreal, Nynaeve and Elayne conferred with Egwene and the Aiel Wise Ones, sharing vital news and whispered anxieties across impossible, dream-forged distances. Yet, this hidden realm was not their exclusive sanctuary. Moghedien, a consummate master of its fluid realities, hunted them there with chilling persistence. In a terrifying, dream-woven confrontation, the Forsaken's venomous malice struck not only at Nynaeve but also at Birgitte Silverbow, a legendary archer and one of the revered Heroes of the Horn, whose spirit awaited rebirth within the dream world. With an act of cruel, devastating power, Moghedien ripped Birgitte from the fabric of Tel'aran'rhiod, casting her, grievously wounded and life-force fading, into the harsh, unforgiving reality of the waking world. In a desperate, instinctive act of preservation, Elayne forged an unprecedented bond, making Birgitte her Warder—an act unheard of, a bond of necessity and compassion forged by one not yet a full Aes Sedai. Birgitte, snatched from the mists of legend into a fragile mortal coil, survived, her destiny now inextricably, profoundly linked with the Daughter-Heir of Andor, their shared ordeal forging a deep and resilient companionship.",
+                        "While some sought the shadows of refuge, others actively fanned the embers of rebellion. Siuan Sanche, stripped of her title and her connection to the Source but not of her formidable will and razor-sharp intellect, journeyed onward. With her traveled Leane Sharif, her former Keeper, also stilled and grappling with a startlingly flamboyant new persona, and the clear-eyed Min Farshaw, whose cryptic visions painted tantalizing, often unsettling, pictures of the future. Their arduous quest led them to the unassuming, almost forgotten village of Salidar, nestled in the hinterlands of Altara. Here, a hidden enclave of Aes Sedai, those who defied Elaida's tyrannical rule and the fracturing of the Tower, had gathered in secret. Though stilled, Siuan's mind remained a potent weapon of political maneuvering. With carefully chosen words and shrewd, insightful calculations, she began to weave the disparate threads of dissent into a cohesive, purposeful force, subtly guiding the Salidar Aes Sedai, led by the wary Sheriam Bayanar and a council of equally cautious Sitters, to declare themselves the true heart of the White Tower and to acknowledge the urgent, undeniable need to find and guide the Dragon Reborn. Into this volatile crucible of rebellion strode Gareth Bryne, the former Captain-General of Andor's Queen's Guard, a man of unyielding honor and legendary military prowess. He had tracked Siuan across kingdoms, initially to hold her to an oath extracted under duress, but soon found himself drawn into the Aes Sedai's desperate cause, agreeing to raise an army for this nascent, defiant rebellion.",
+                    ],
+                },
+                {
+                    title: "The Siege of Cairhien",
+                    paragraphs: [
+                        "The smoldering embers of conflict finally erupted into a raging inferno around the beleaguered city of Cairhien. Rand's Aiel, a storm of flashing spears and chilling battle cries, crashed against the Shaido hordes that had laid siege to the city's proud walls. The battles that followed were a maelstrom of unimaginable carnage and breathtaking courage, the fate of a nation hanging precariously in the balance. Mat Cauthon, despite every ingrained instinct to remain a mere observer, to avoid the crushing weight of command, found himself thrust into the very heart of the conflict. The ancient, spectral memories surged within him, transforming the reluctant gambler into an instinctive, brilliant commander. He rallied the demoralized Tairen and Cairhienin soldiers, his unconventional tactics and uncanny luck snatching improbable victories from the very jaws of defeat. In a brutal, desperate duel that would decide the fate of thousands, Mat faced Couladin, the charismatic, false Car'a'carn. With a final, decisive blow, born of skill and a touch of the Pattern's favor, Mat ended the Shaido leader's reign of terror, shattering his army's will to fight and scattering them to the winds. Yet, even in the heady rush of victory, the Shadow's chilling touch was keenly felt. From his distant, shadowed throne in Illian, the Forsaken Sammael unleashed a torrent of the One Power, a devastating, unseen attack that obliterated the tower from which Rand had been directing his forces. Rand survived, shielded by the Pattern or perhaps by sheer chance, but the assault was a stark, chilling reminder of the ever-present, insidious threat posed by the Forsaken. The crown of Cairhien, a glittering symbol of his hard-won, bloody victory, was offered to him. But Rand, wary of such trappings of power, refused it, choosing instead to become the city's protector, his influence spreading beyond the Aiel, drawing \"wetlanders\" to his banner, his legend growing with each passing day.",
+                    ],
+                },
+                {
+                    title: "The Cost of Prophecy: Sacrifice at the Docks",
+                    paragraphs: [
+                        "Dark tidings, like carrion birds, traveled on the wind, reaching Rand amidst the fragile peace of a newly liberated Cairhien. Word arrived that Queen Morgase Trakand of Andor, Elayne's mother and a cornerstone of Westland stability, was presumed dead, her throne usurped by the shadowy, manipulative Lord Gaebril. This Gaebril was none other than the Forsaken Rahvin, his insidious, mind-twisting Compulsion having ensnared the Queen and twisted her will to his own. In truth, Morgase, with a desperate courage she did not know what she possessed, had narrowly escaped the gilded cage of Caemlyn. A fugitive in her own land, she journeyed towards the uncertain sanctuary of Amadicia, heartbreakingly oblivious to her tormentor's true, monstrous identity. Rand, already burdened by the crushing weight of a world's salvation, felt a fresh, agonizing surge of guilt and incandescent fury, believing he had failed to protect Andor, failed to shield Elayne's mother from the Shadow's grasp.",
+                        "Before he could turn his righteous wrath upon Rahvin, another of the Forsaken, driven by motives far more personal and twisted, unleashed her power. Lanfear, her breathtaking beauty a deceptive mask for an obsessive, possessive love for Lews Therin's reincarnation, her mind poisoned by a venomous jealousy of Rand's burgeoning bond with Aviendha, attacked them in Cairhien. Her fury was a tempest of the One Power, beautiful and deadly. But Moiraine Damodred, her every action, every sacrifice, guided by an unshakeable, almost fanatical resolve to see the Dragon Reborn fulfill his prophesied destiny, had foreseen this terrible confrontation in the swirling visions of a Rhuidean ter'angreal. In an act of ultimate, selfless sacrifice, the Aes Sedai threw herself at Lanfear. The two powerful channelers, Light and Shadow locked in a desperate, final struggle, plunged through the shimmering, unstable redstone doorway ter'angreal—the gateway to the enigmatic, perilous realm of the Aelfinn and Eelfinn. The portal flared with an unnatural light, then buckled and melted into incandescent slag, sealing their fate. Moiraine and Lanfear were gone, consumed by the mysteries that lay beyond the melted stone. Lan's Warder bond, a lifeline of shared existence, a connection deeper than blood, shattered with Moiraine's apparent demise. As per her meticulous, secret arrangements, born of a profound understanding of a Warder's grief, the bond flowed not into the agonizing oblivion of severance but to Myrelle Berengari, another Aes Sedai. It was a desperate, compassionate measure to spare Lan the soul-crushing agony that would have otherwise undoubtedly claimed him. Rand, who had so often chafed under Moiraine's cryptic guidance, who had railed against her perceived manipulations, was left utterly devastated, the true depth of her unwavering sacrifice and the profound wisdom he had so often spurned finally, heartbreakingly, laid bare.",
+                    ],
+                },
+                {
+                    title: "Shadows over Caemlyn",
+                    paragraphs: [
+                        "Grief-stricken, his heart a hollow ache, but his resolve forged anew in the fires of loss, Rand focused his burning rage on Rahvin. The art of Traveling, a perilous gift of the One Power taught by the captive and resentful Asmodean, became his swift chariot of vengeance. In the blink of an eye, he transported himself and a handpicked force of his most loyal Aiel warriors—the Maidens of the Spear, fierce and unyielding—across the vast distances to the royal city of Caemlyn. But Rahvin, a master of deceit and illusion, a spider in his web of power, was waiting. The very skies above the Andoran capital wept tears of lightning, and the air crackled with a malevolent, palpable energy. In the ensuing chaos of Rahvin's meticulously laid and deadly trap, Mat Cauthon, Aviendha, and even the Forsaken Asmodean were struck down, their lives seemingly extinguished by the Forsaken's devastating, indiscriminate attacks.",
+                    ],
+                },
+                {
+                    title: "Balefire in the Dream",
+                    paragraphs: [
+                        "Consumed by a grief so profound it bordered on madness, his soul screaming for retribution, Rand hunted Rahvin through the opulent, now bloodstained, halls of the Royal Palace. Their cataclysmic duel, a tempest of raw Power and desperate fury, transcended the confines of the physical realm, spilling over into the treacherous, dreamlike landscape of Tel'aran'rhiod. There, in that world of shifting realities and malleable truths, an unexpected and crucial ally emerged. Nynaeve al'Meara, who, with the invaluable aid of Birgitte Silverbow, had ingeniously ensnared the elusive Moghedien in the World of Dreams using a Seanchan a'dam, learned of Rand's desperate, life-or-death struggle. Fearless, her spirit ablaze with righteous fury, she plunged into the dream-reflection of Caemlyn. Her sudden, electrifying appearance, a flash of pure, unadulterated anger and protective loyalty, momentarily distracted the powerful Rahvin. In that critical, fleeting instant, Rand gathered the full, terrible might of saidin, the male half of the One Power, and unleashed a torrent of balefire—a forbidden, terrifying weave that not only killed its victim but also burned their thread from the Pattern backward in time, erasing their most recent actions from existence. Rahvin, caught in the searing, incandescent stream of pure destruction, was annihilated, his very being unraveled from the threads of time, his dark reign brought to an abrupt and absolute end.",
+                    ],
+                },
+                {
+                    title: "An Unquiet Victory and New Alliances",
+                    paragraphs: [
+                        'The paradox of balefire, a ripple against the current of time, spread backward through the immediate past. In the waking world, within the ravaged palace of Caemlyn, Mat Cauthon, Aviendha, and Asmodean stirred, gasping for breath, their "deaths" undone, their lives miraculously restored as if the Forsaken\'s lightning had never found its mark. Victory, however, was a fragile, blood-soaked thing, and it was soon tainted with fresh, chilling tragedy. In the quiet, stunned aftermath, as Caemlyn lay bruised and battered under Rand\'s uncertain control, Asmodean, the reluctant teacher, the Forsaken bound by shield and oath to Rand\'s will, wandered into the shadowed depths of the palace. A figure, cloaked in obscurity, met him there. "You are no longer shielded, are you?" a voice whispered, devoid of warmth, cold and final as the grave. "And you are not him." A flash of unseen violence, a life extinguished in the shadows, and Asmodean fell, his second, true death leaving Rand once more without a guide in the perilous, labyrinthine currents of the One Power. The identity of his killer remained a chilling, unanswered enigma, a whisper of future betrayals.',
+                        "As the fires of battle in Caemlyn finally died down, casting long, dancing shadows over a city forever changed, another arduous journey reached its destination. Nynaeve, Elayne, their loyal companions Thom and Juilin, and the now-mortal, fiercely spirited Birgitte, arrived at the gates of Salidar. Exhausted, travel-worn, but unbowed, they brought their news of triumphs and terrors, of captured Forsaken and battles won against impossible odds, to the council of rebel Aes Sedai. They were received with a mixture of wary suspicion, cautious hope, and a dawning understanding of the monumental stakes at play. In the hidden, ethereal corners of Tel'aran'rhiod, Nynaeve still held the invisible leash of the a'dam, Moghedien her unwilling, seething captive—a powerful, dangerous weapon in the escalating struggles yet to come. The world had been irrevocably scarred, the Pattern itself strained and rewoven by the fires of heaven, but the Wheel, indifferent to the suffering of mortals, continued its inexorable turn, weaving new destinies from the ashes of the old.",
+                    ],
+                },
+            ];
+
+            const charactersData = [
+                {
+                    id: "rand",
+                    name: "Rand al'Thor",
+                    role: "The Dragon Reborn, Car'a'carn",
+                    imagePlaceholder: "RDT",
+                    details: {
+                        description:
+                            "The central protagonist, prophesied to save the world from the Dark One, but also to break it anew. He is the reincarnation of Lews Therin Telamon, the Dragon from the Age of Legends.",
+                        keyRelationships:
+                            "Deepening romance with Aviendha. Strained but evolving respect for Moiraine Damodred. Haunted by the voice of Lews Therin Telamon in his mind.",
+                        significantDevelopments:
+                            "Officially declared Car'a'carn by most Aiel clans. Leads Aiel across the Dragonwall. Grapples with increasing ruthlessness, isolation, and the madness from the tainted saidin. Uses balefire to defeat Rahvin, an act with dangerous consequences. Loses Moiraine as a guide and Asmodean as a teacher.",
+                    },
+                },
+                {
+                    id: "moiraine",
+                    name: "Moiraine Damodred",
+                    role: "Aes Sedai of the Blue Ajah",
+                    imagePlaceholder: "MD",
+                    details: {
+                        description:
+                            "A powerful and knowledgeable Aes Sedai who has guided Rand since discovering him in Emond's Field. She is fiercely dedicated to ensuring the Dragon Reborn is ready for Tarmon Gai'don.",
+                        keyRelationships:
+                            "Her relationship with Rand evolves from mentor/guide to one of cautious, mutual respect. Deep bond with her Warder, Lan Mandragoran.",
+                        significantDevelopments:
+                            "Uncovers critical information about the Forsaken and prophecies. Makes the ultimate sacrifice by confronting Lanfear and pulling them both through a ter'angreal doorway to an unknown fate, presumably their deaths, to protect Rand.",
+                    },
+                },
+                {
+                    id: "lan",
+                    name: "Lan Mandragoran",
+                    role: "Uncrowned King of Malkier, Moiraine's Warder",
+                    imagePlaceholder: "LM",
+                    details: {
+                        description:
+                            "A stoic and highly skilled warrior, bound to Moiraine as her Warder. He is the last survivor of the royal line of the fallen kingdom of Malkier.",
+                        keyRelationships:
+                            "Deeply loyal to Moiraine. His Warder bond is passed to Myrelle upon Moiraine's apparent death.",
+                        significantDevelopments:
+                            "Experiences profound grief after Moiraine's sacrifice. The passing of his bond prevents him from seeking death in battle, a common fate for Warders who lose their Aes Sedai.",
+                    },
+                },
+                {
+                    id: "aviendha",
+                    name: "Aviendha",
+                    role: "Wise One apprentice, former Maiden of the Spear",
+                    imagePlaceholder: "AV",
+                    details: {
+                        description:
+                            "A proud and skilled Aiel woman, torn between her duties and her growing feelings for Rand. She is training to become a Wise One.",
+                        keyRelationships:
+                            "Her romantic relationship with Rand blossoms, though it's complicated by Aiel customs and Rand's destiny. Strong friendship with Egwene al'Vere.",
+                        significantDevelopments:
+                            "Accompanies Rand across the Dragonwall. Struggles with her feelings for Rand and her destiny. Briefly killed by Rahvin and resurrected by Rand's use of balefire. Continues her training with the Wise Ones.",
+                    },
+                },
+                {
+                    id: "egwene",
+                    name: "Egwene al'Vere",
+                    role: "Powerful channeler and Dreamer.",
+                    imagePlaceholder: "EA",
+                    details: {
+                        description:
+                            "A determined young woman from Emond's Field, rapidly developing her channeling abilities and skills in Tel'aran'rhiod (the World of Dreams).",
+                        keyRelationships:
+                            "Close friend to Rand, Nynaeve, and Aviendha. Mentored by the Aiel Wise Ones.",
+                        significantDevelopments:
+                            "Becomes a powerful Dreamwalker. Is later brought to Salidar and manipulated by the rebel Aes Sedai into being raised as their Amyrlin Seat, a position of immense authority she begins to grow into.",
+                    },
+                },
+                {
+                    id: "nynaeve",
+                    name: "Nynaeve al'Meara",
+                    role: "Former Wisdom of Emond's Field, incredibly powerful channeler.",
+                    imagePlaceholder: "NM",
+                    details: {
+                        description:
+                            "The former Wisdom of Emond's Field, known for her fiery temper and powerful, if often blocked, ability to channel. She is fiercely protective of her friends.",
+                        keyRelationships:
+                            "Travels with Elayne Trakand. Growing romantic feelings for Lan Mandragoran.",
+                        significantDevelopments:
+                            "Embarks on a quest to find the rebel Aes Sedai in Salidar. In a groundbreaking achievement, she Heals Siuan Sanche and Leane Sharif of being stilled. Captures the Forsaken Moghedien in Tel'aran'rhiod.",
+                    },
+                },
+                {
+                    id: "elayne",
+                    name: "Elayne Trakand",
+                    role: "Daughter-Heir of Andor, skilled channeler.",
+                    imagePlaceholder: "ET",
+                    details: {
+                        description:
+                            "The intelligent and capable heir to the throne of Andor, also training to become an Aes Sedai. She is resourceful and politically astute.",
+                        keyRelationships:
+                            "Close friend and traveling companion to Nynaeve. Developing feelings for Rand al'Thor.",
+                        significantDevelopments:
+                            "Travels to Salidar with Nynaeve. Bonds Birgitte Silverbow, a Hero of the Horn, as her Warder after Birgitte is pulled from Tel'aran'rhiod. Begins to make plans to reclaim her throne from Rahvin's influence.",
+                    },
+                },
+                {
+                    id: "mat",
+                    name: "Mat Cauthon",
+                    role: "Ta'veren, gambler, reluctant military genius.",
+                    imagePlaceholder: "MC",
+                    details: {
+                        description:
+                            "A charming rogue with a penchant for gambling and trouble, Mat is also a powerful ta'veren whose luck influences events around him. He possesses ancient memories of battles and strategy from his encounter with the Eelfinn.",
+                        keyRelationships:
+                            "Childhood friend of Rand and Perrin. Reluctantly respects Rand's authority. Brief romantic entanglement with the Shaido Maiden Melindhra, who ultimately betrays him (or attempts to, as she is a Darkfriend). He begins to gather a following of soldiers who will become the nucleus of the Band of the Red Hand.",
+                        significantDevelopments:
+                            "Uses his ancient memories to become a brilliant military commander. Forms and leads the Band of the Red Hand. Kills the Shaido leader Couladin. Briefly killed by Rahvin and resurrected by Rand's use of balefire.",
+                    },
+                },
+                {
+                    id: "siuan",
+                    name: "Siuan Sanche",
+                    role: "Deposed Amyrlin Seat, stilled.",
+                    imagePlaceholder: "SS",
+                    details: {
+                        description:
+                            "The former leader of the White Tower, stilled (cut off from the One Power) and overthrown by Elaida's faction. She is determined and cunning.",
+                        keyRelationships:
+                            "Travels with Leane Sharif (her former Keeper, also stilled) and Min Farshaw. She forges a complex, antagonistic, yet mutually reliant relationship with Gareth Bryne.",
+                        significantDevelopments:
+                            "Despite being stilled, Siuan proves she is still a formidable political force, demonstrating immense resilience and cunning.",
+                    },
+                },
+                {
+                    id: "min",
+                    name: "Min Farshaw",
+                    role: "Seer of auras and futures.",
+                    imagePlaceholder: "MF",
+                    details: {
+                        description:
+                            "A young woman with the unique ability to see visions and omens around people, which often foretell future events. She is pragmatic and loyal.",
+                        keyRelationships:
+                            "Loyal to Siuan. She is in love with Rand (one of the three women fated to share him) and is open about this with Elayne.",
+                        significantDevelopments:
+                            "Min continues to provide crucial insights through her viewings and remains a steadfast, pragmatic presence.",
+                    },
+                },
+                {
+                    id: "rahvin",
+                    name: "Rahvin",
+                    role: "Forsaken",
+                    imagePlaceholder: "RA",
+                    details: {
+                        description:
+                            "One of the thirteen most powerful channelers from the Age of Legends who swore allegiance to the Dark One. Known for his use of Compulsion and desire for luxury.",
+                        keyRelationships:
+                            "Ally of other Forsaken like Graendal and Sammael.",
+                        significantDevelopments:
+                            "Seizes control of Andor by Compelling Queen Morgase. Is confronted and ultimately killed by Rand al'Thor in a devastating battle that extends into Tel'aran'rhiod, his death by balefire reversing some of his recent actions.",
+                    },
+                },
+                {
+                    id: "lanfear",
+                    name: "Lanfear (Selene)",
+                    role: "Forsaken",
+                    imagePlaceholder: "LA",
+                    details: {
+                        description:
+                            "One of the most powerful channelers from the Age of Legends, obsessed with Lews Therin Telamon (and thus Rand). She is beautiful, cunning, and incredibly dangerous.",
+                        keyRelationships:
+                            "Complex and possessive relationship with Rand (as Lews Therin's reincarnation).",
+                        significantDevelopments:
+                            "Continues to try and manipulate Rand to her side. Is confronted by Moiraine Damodred at the docks in Cairhien and is pulled through the redstone ter'angreal with Moiraine, both presumed dead.",
+                    },
+                },
+                {
+                    id: "moghedien",
+                    name: "Moghedien ('The Spider')",
+                    role: "Forsaken",
+                    imagePlaceholder: "MO",
+                    details: {
+                        description:
+                            "A Forsaken known for her subtlety, lurking in shadows, and mastery of Tel'aran'rhiod. She prefers to avoid direct confrontation.",
+                        keyRelationships: "Enemy of Nynaeve and Elayne.",
+                        significantDevelopments:
+                            "Engages in several confrontations with Nynaeve and Elayne in Tel'aran'rhiod. Is eventually defeated and captured by Nynaeve, who shields her and controls her with an a'dam.",
+                    },
+                },
+                {
+                    id: "asmodean",
+                    name: "Asmodean (Jasin Nata)",
+                    role: "Forsaken, Rand's unwilling teacher",
+                    imagePlaceholder: "AS",
+                    details: {
+                        description:
+                            "A Forsaken who was partially shielded by Rand and Lanfear, cutting him off from the Dark One and much of his power. He was forced to teach Rand about the One Power.",
+                        keyRelationships:
+                            "Reluctant and resentful teacher to Rand al'Thor.",
+                        significantDevelopments:
+                            "Travels with Rand, providing him with knowledge of channeling. Is briefly killed by Rahvin and resurrected by Rand's balefire. Shortly after Rahvin's defeat, Asmodean is mysteriously murdered in the Royal Palace in Caemlyn by an unknown assailant (later revealed to be Graendal).",
+                    },
+                },
+            ];
+
+            const placesData = [
+                {
+                    id: "rhuidean",
+                    name: "Rhuidean",
+                    imagePlaceholder: "RH",
+                    details: {
+                        description:
+                            "A sacred, ancient, and once-forbidden city located deep within the Aiel Waste. It is a place of immense historical and spiritual significance to the Aiel.",
+                        significance:
+                            "Contains remnants of the Age of Legends, powerful ter'angreal (including glass columns that show Aiel history and a doorway to the land of the Eelfinn/Aelfinn), and the secrets of Aiel origins. It is where Aiel clan chiefs and Wise One apprentices go to face their past and future.",
+                        notableEvents:
+                            "Rand al'Thor enters Rhuidean, learns the history of the Aiel, and is declared the Car'a'carn. Mat Cauthon also enters and receives his foxhead medallion, the Ashandarei spear, and memories of past lives. Moiraine Damodred gains crucial knowledge here.",
+                    },
+                },
+                {
+                    id: "aielwaste",
+                    name: "The Aiel Waste",
+                    imagePlaceholder: "AW",
+                    details: {
+                        description:
+                            "A vast, harsh desert east of the Spine of the World mountains. It is a land of extreme temperatures and scarce resources, considered uninhabitable by most wetlanders.",
+                        significance:
+                            "The homeland of the Aiel warrior culture. Its unforgiving nature has shaped the Aiel into resilient and formidable people. It is the staging ground for Rand's unification of most Aiel clans.",
+                        notableEvents:
+                            "Rand is proclaimed Car'a'carn by most Aiel clans. The Shaido Aiel under Couladin begin their rebellion here before crossing the Dragonwall. Egwene trains with the Wise Ones here.",
+                    },
+                },
+                {
+                    id: "cairhien",
+                    name: "Cairhien",
+                    imagePlaceholder: "CAI",
+                    details: {
+                        description:
+                            "A major city-state in the wetlands, known for its intricate politics, its topless towers, and the Daes Dae'mar (the Great Game of Houses). It has a history of conflict with the Aiel.",
+                        significance:
+                            "Strategically important due to its location and resources. Becomes a focal point of conflict when besieged by the Shaido Aiel.",
+                        notableEvents:
+                            "The Shaido Aiel lay siege to the city. Rand al'Thor leads his Aiel forces to lift the siege and subsequently takes control of Cairhien. Moiraine Damodred and Lanfear have their fateful confrontation at the Cairhien docks. Mat Cauthon's Band of the Red Hand gains prominence here.",
+                    },
+                },
+                {
+                    id: "caemlyn",
+                    name: "Caemlyn",
+                    imagePlaceholder: "CAM",
+                    details: {
+                        description:
+                            "The capital city of Andor, one of the most powerful nations. It is known for its white walls, the Royal Palace, and its historical significance.",
+                        significance:
+                            "The seat of Andoran power. Its control is vital for anyone wishing to influence the Westlands.",
+                        notableEvents:
+                            "The Forsaken Rahvin seizes control of Caemlyn through Compulsion of Queen Morgase. Rand al'Thor confronts Rahvin here, with their battle extending into Tel'aran'rhiod, culminating in Rahvin's death by balefire. Asmodean is murdered in the Royal Palace.",
+                    },
+                },
+                {
+                    id: "salidar",
+                    name: "Salidar",
+                    imagePlaceholder: "SA",
+                    details: {
+                        description:
+                            "A small, unassuming village in Altara, previously of little note.",
+                        significance:
+                            "Becomes the secret gathering place for the rebel Aes Sedai faction that opposes Elaida a'Roihan's rule in the White Tower. It is where they begin to organize and plan their next moves.",
+                        notableEvents:
+                            "Nynaeve al'Meara and Elayne Trakand arrive here, joining the rebels. Siuan Sanche and Leane Sharif also find refuge here. Nynaeve Heals Siuan and Leane of Stilling. Egwene al'Vere is brought to Salidar and raised as the Amyrlin Seat of the rebel Aes Sedai.",
+                    },
+                },
+                {
+                    id: "telaranrhiod",
+                    name: "Tel'aran'rhiod (The World of Dreams)",
+                    imagePlaceholder: "TA",
+                    details: {
+                        description:
+                            "An alternate reality that is a reflection of the waking world, but where distances are malleable and the environment can be shaped by strong-willed dreamers. It is accessible to Dreamwalkers or through certain ter'angreal.",
+                        significance:
+                            "A place of great power, knowledge, and immense danger. It is used by Aiel Wise Ones for training and communication, and by the Forsaken for their schemes. The spirits of the Heroes of the Horn await rebirth here.",
+                        notableEvents:
+                            "Egwene al'Vere hones her skills as a Dreamwalker here. Nynaeve confronts and captures the Forsaken Moghedien in Tel'aran'rhiod. Rand al'Thor's climactic battle against Rahvin partially takes place here, with reality-altering consequences. Birgitte Silverbow is pulled from Tel'aran'rhiod into the waking world.",
+                    },
+                },
+            ];
+
+            const worldData = {
+                magicalConstructs: [
+                    {
+                        name: "The Wheel of Time",
+                        description:
+                            "Represents time as cyclical, not linear. The Wheel has seven spokes, each representing an Age. It spins the Pattern of Ages using the lives of individuals as its threads, weaving the tapestry of reality.",
+                    },
+                    {
+                        name: "The One Power",
+                        description:
+                            "The driving force of the Wheel, drawn from the True Source. It is divided into two halves: <em>saidin</em> (the male half) and <em>saidar</em> (the female half). While different, they are interconnected and complementary. <em>Saidin</em> was tainted by the Dark One's counterstroke during the War of the Power, causing male channelers to eventually go mad and die, leading to the Breaking of the World. <em>Saidar</em> remains untainted.",
+                    },
+                    {
+                        name: "Ta'veren",
+                        description:
+                            "Individuals who are focal points in the Pattern. The threads of destiny (the lives of people around them) weave more tightly around a <em>ta'veren</em>, causing improbable coincidences and influencing events to ensure the Pattern unfolds as it must. Rand al'Thor, Mat Cauthon, and Perrin Aybara are the primary <em>ta'veren</em> of this Age.",
+                    },
+                    {
+                        name: "Ter'angreal",
+                        description:
+                            "Objects made with the One Power during the Age of Legends or earlier, designed for various specific purposes. Unlike <em>angreal</em> or <em>sa'angreal</em> (which simply amplify the One Power), <em>ter'angreal</em> have unique functions, such as accessing Tel'aran'rhiod, Healing, or creating gateways. Their original purposes are often lost to time.",
+                    },
+                    {
+                        name: "Tel'aran'rhiod (The World of Dreams)",
+                        description:
+                            "An alternate reality that is a reflection of the waking world, but also a place where 'what is' and 'what was' and 'what could be' sometimes merge. Distances are malleable, and the environment can be shaped by strong-willed dreamers (Dreamwalkers). It is a place of great power and knowledge, but also immense danger, as injuries or death in Tel'aran'rhiod can be real.",
+                    },
+                    {
+                        name: "Balefire",
+                        description:
+                            "A powerful and forbidden weave of the One Power. When it strikes a target, it not only kills them but also burns their thread from the Pattern backward in time, effectively erasing their most recent actions from existence. Its use is highly dangerous as it can damage the Pattern itself if used excessively or too powerfully.",
+                    },
+                ],
+                culturesAndFactions: [
+                    {
+                        name: "Aiel",
+                        description:
+                            "A warrior culture from the Aiel Waste, known for their extreme hardiness, fighting prowess, and strict code of honor called <em>ji'e'toh</em>. They are divided into twelve clans (plus the outcast Shaido). Rand al'Thor is declared the Car'a'carn, the 'chief of chiefs,' uniting many clans, though some, like the Shaido, rebel. Key sub-groups include the <strong>Maidens of the Spear</strong> (fiercely loyal women warriors who have sworn to protect the Car'a'carn) and the <strong>Wise Ones</strong> (powerful spiritual leaders, advisors, and Dreamwalkers like Amys, Bair, Melaine, and Sorilea, who mentor Egwene and Aviendha).",
+                    },
+                    {
+                        name: "Aes Sedai",
+                        description:
+                            "A powerful organization of women who can channel the One Power, historically centered in the city of Tar Valon and the White Tower. They are divided into seven Ajahs, each with a different focus. In 'The Fires of Heaven,' the White Tower is fractured. <strong>Elaida a'Roihan's Faction</strong> is led by Elaida, who seized the Amyrlin's stole after overthrowing Siuan Sanche, and is seen as tyrannical by many. The <strong>Salidar Aes Sedai</strong> form a rebel faction gathering secretly in Salidar, defying Elaida and seeking to establish their own leadership and guide the Dragon Reborn.",
+                    },
+                    {
+                        name: "The Forsaken (The Chosen)",
+                        description:
+                            "Thirteen of the most powerful channelers from the Age of Legends who swore allegiance to the Dark One during the War of the Power. They were sealed away with the Dark One in Shayol Ghul but are now breaking free. They seek to sow chaos, dominate the world, and ensure the Dark One's victory. Notable Forsaken active in this book include Rahvin, Lanfear, Sammael, Moghedien, Asmodean, and Graendal.",
+                    },
+                    {
+                        name: "Children of the Light (Whitecloaks)",
+                        description:
+                            "A militaristic organization based in Amadicia, dedicated to eradicating Darkfriends and all forms of channeling, which they view as inherently evil. They are often zealous and intolerant, causing conflict wherever they go.",
+                    },
+                    {
+                        name: "Heroes of the Horn",
+                        description:
+                            "Legendary figures from past Ages whose spirits await rebirth in Tel'aran'rhiod, bound to the Horn of Valere. They are destined to be called back to fight at Tarmon Gai'don, the Last Battle. Birgitte Silverbow is one such Hero who becomes prominent in this book after being pulled from Tel'aran'rhiod.",
+                    },
+                ],
+            };
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const storyContentEl = document.getElementById("story-content");
+                const charactersGridEl =
+                    document.getElementById("characters-grid");
+                const placesGridEl = document.getElementById("places-grid");
+                const worldContentEl = document.getElementById("world-content");
+                const modalEl = document.getElementById("modal");
+                const modalTitleEl = document.getElementById("modal-title");
+                const modalBodyEl = document.getElementById("modal-body");
+                const closeModalBtn = document.getElementById("close-modal");
+                const mobileMenuButton =
+                    document.getElementById("mobile-menu-button");
+                const mobileMenu = document.getElementById("mobile-menu");
+                const navLinks = document.querySelectorAll(".nav-link");
+                const tabContents = document.querySelectorAll(".tab-content");
+
+                function createCollapsible(
+                    title,
+                    content,
+                    isSubCollapsible = false,
+                ) {
+                    const container = document.createElement("div");
+                    container.className = `rounded-lg shadow-md overflow-hidden border border-[var(--color-border)] ${isSubCollapsible ? "ml-4 mt-2" : ""}`;
+
+                    const header = document.createElement("button");
+                    header.className = `w-full text-left p-4 sm:p-5 flex justify-between items-center focus:outline-none transition-colors duration-200 hover:bg-[var(--color-border)] ${isSubCollapsible ? "text-base" : "text-xl sm:text-2xl"} font-semibold`;
+                    header.style.backgroundColor = isSubCollapsible
+                        ? "var(--color-bg-card)"
+                        : "var(--color-bg-collapsible-header)";
+                    header.style.color = "var(--color-text-heading)";
+
+                    const titleSpan = document.createElement("span");
+                    titleSpan.textContent = title;
+
+                    const chevronSpan = document.createElement("span");
+                    chevronSpan.className = "chevron text-sm";
+
+                    header.appendChild(titleSpan);
+                    header.appendChild(chevronSpan);
+
+                    const contentDiv = document.createElement("div");
+                    contentDiv.className =
+                        "collapsible-content p-4 sm:p-6 prose max-w-none";
+                    contentDiv.style.backgroundColor = "var(--color-bg-card)";
+                    contentDiv.style.color = "var(--color-text-main)";
+
+                    if (Array.isArray(content)) {
+                        // This is a main story section with paragraphs
+                        content.forEach((paragraphText, index) => {
+                            // Create a sub-collapsible for each paragraph
+                            const subCollapsible = createCollapsible(
+                                `Paragraph ${index + 1}`,
+                                paragraphText,
+                                true,
+                            );
+                            contentDiv.appendChild(subCollapsible);
+                        });
+                    } else if (typeof content === "string") {
+                        // This is a single paragraph for a sub-collapsible
+                        const p = document.createElement("p");
+                        p.innerHTML = content; // Use innerHTML to allow for <em> tags etc.
+                        p.className = "mb-3 last:mb-0";
+                        contentDiv.appendChild(p);
+                    }
+
+                    container.appendChild(header);
+                    container.appendChild(contentDiv);
+
+                    header.addEventListener("click", () => {
+                        const isOpen = contentDiv.classList.toggle("open");
+                        header.classList.toggle("open");
+                        header.setAttribute("aria-expanded", isOpen);
+
+                        if (isOpen) {
+                            contentDiv.style.maxHeight =
+                                contentDiv.scrollHeight + "px";
+                            contentDiv.addEventListener(
+                                "transitionend",
+                                function handler() {
+                                    if (contentDiv.classList.contains("open")) {
+                                        contentDiv.style.maxHeight = "99999px";
+                                    }
+                                    contentDiv.removeEventListener(
+                                        "transitionend",
+                                        handler,
+                                    );
+                                },
+                            );
+                        } else {
+                            contentDiv.style.maxHeight =
+                                contentDiv.scrollHeight + "px";
+                            requestAnimationFrame(() => {
+                                contentDiv.style.maxHeight = "0";
+                            });
+                        }
+
+                        let currentElement = container;
+                        while (
+                            currentElement.parentElement &&
+                            currentElement.parentElement.classList.contains(
+                                "collapsible-content",
+                            )
+                        ) {
+                            const parentContentDiv =
+                                currentElement.parentElement;
+                            if (
+                                isOpen &&
+                                !parentContentDiv.classList.contains("open")
+                            ) {
+                                parentContentDiv.classList.add("open");
+                                const parentHeader =
+                                    parentContentDiv.previousElementSibling;
+                                if (
+                                    parentHeader &&
+                                    parentHeader.tagName === "BUTTON"
+                                ) {
+                                    parentHeader.classList.add("open");
+                                    parentHeader.setAttribute(
+                                        "aria-expanded",
+                                        "true",
+                                    );
+                                }
+                            }
+
+                            requestAnimationFrame(() => {
+                                parentContentDiv.style.maxHeight =
+                                    parentContentDiv.scrollHeight + "px";
+                                if (
+                                    parentContentDiv.classList.contains("open")
+                                ) {
+                                    parentContentDiv.addEventListener(
+                                        "transitionend",
+                                        function parentHandler() {
+                                            parentContentDiv.style.maxHeight =
+                                                "99999px";
+                                            parentContentDiv.removeEventListener(
+                                                "transitionend",
+                                                parentHandler,
+                                            );
+                                        },
+                                    );
+                                }
+                            });
+
+                            currentElement = parentContentDiv;
+                        }
+                    });
+                    return container;
+                }
+
+                storyData.forEach((section) => {
+                    storyContentEl.appendChild(
+                        createCollapsible(section.title, section.paragraphs),
+                    );
+                });
+
+                function populateWorldContent() {
+                    const constructsTitle = document.createElement("h3");
+                    constructsTitle.textContent = "Magical Constructs";
+                    constructsTitle.className =
+                        "text-2xl sm:text-3xl font-semibold mb-4 mt-8 text-center sm:text-left";
+                    worldContentEl.appendChild(constructsTitle);
+                    worldData.magicalConstructs.forEach((item) => {
+                        worldContentEl.appendChild(
+                            createCollapsible(
+                                item.name,
+                                `<p>${item.description}</p>`,
+                            ),
+                        );
+                    });
+
+                    const factionsTitle = document.createElement("h3");
+                    factionsTitle.textContent = "Key Cultures & Factions";
+                    factionsTitle.className =
+                        "text-2xl sm:text-3xl font-semibold mb-4 mt-10 text-center sm:text-left";
+                    worldContentEl.appendChild(factionsTitle);
+                    worldData.culturesAndFactions.forEach((item) => {
+                        worldContentEl.appendChild(
+                            createCollapsible(
+                                item.name,
+                                `<p>${item.description}</p>`,
+                            ),
+                        );
+                    });
+                }
+                populateWorldContent();
+
+                function createCard(item, type) {
+                    const card = document.createElement("div");
+                    card.className = "card cursor-pointer flex flex-col";
+                    card.innerHTML = `
+                <div class="flex-grow">
+                    <h3 class="text-xl sm:text-2xl font-bold mb-2" style="color: var(--color-text-heading);">${item.name}</h3>
+                    <p class="text-sm mb-3 flex-grow" style="color: var(--color-text-subtle);">${type === "character" ? item.role : item.details.description.substring(0, 100) + "..."}</p>
+                </div>
+                <button class="btn mt-auto self-start text-sm">Learn More</button>
+            `;
+                    card.addEventListener("click", () => openModal(item, type));
+                    return card;
+                }
+
+                charactersData.forEach((char) =>
+                    charactersGridEl.appendChild(createCard(char, "character")),
+                );
+                placesData.forEach((place) =>
+                    placesGridEl.appendChild(createCard(place, "place")),
+                );
+
+                function openModal(item, type) {
+                    modalTitleEl.textContent = item.name;
+                    let bodyContent = "";
+                    if (type === "character") {
+                        bodyContent = `
+                    <h4>Role:</h4><p>${item.role}</p>
+                    <h4>Description:</h4><p>${item.details.description}</p>
+                    <h4>Key Relationships:</h4><p>${item.details.keyRelationships}</p>
+                    <h4>Significant Developments:</h4><p>${item.details.significantDevelopments}</p>
+                `;
+                    } else if (type === "place") {
+                        bodyContent = `
+                    <h4>Description:</h4><p>${item.details.description}</p>
+                    <h4>Significance:</h4><p>${item.details.significance}</p>
+                    <h4>Notable Events:</h4><p>${item.details.notableEvents}</p>
+                `;
+                    }
+                    modalBodyEl.innerHTML = bodyContent;
+                    modalEl.classList.remove("invisible", "opacity-0");
+                    modalEl.classList.add("visible", "opacity-100");
+                    document.body.style.overflow = "hidden";
+                }
+
+                function closeModal() {
+                    modalEl.classList.remove("visible", "opacity-100");
+                    modalEl.classList.add("invisible", "opacity-0");
+                    document.body.style.overflow = "";
+                }
+
+                closeModalBtn.addEventListener("click", closeModal);
+                modalEl.addEventListener("click", (event) => {
+                    if (event.target === modalEl) {
+                        closeModal();
+                    }
+                });
+                document.addEventListener("keydown", (event) => {
+                    if (
+                        event.key === "Escape" &&
+                        modalEl.classList.contains("visible")
+                    ) {
+                        closeModal();
+                    }
+                });
+
+                mobileMenuButton.addEventListener("click", () => {
+                    mobileMenu.classList.toggle("hidden");
+                    const isExpanded = mobileMenu.classList.contains("hidden")
+                        ? "false"
+                        : "true";
+                    mobileMenuButton.setAttribute("aria-expanded", isExpanded);
+                });
+
+                // --- Tabbed Content Logic ---
+                function showTab(tabId) {
+                    // Hide all tab content sections
+                    tabContents.forEach((section) => {
+                        section.classList.remove("active");
+                        section.style.display = "none"; // Ensure display is none for hidden tabs
+                    });
+
+                    // Show the selected tab content section
+                    const activeTab = document.querySelector(tabId);
+                    if (activeTab) {
+                        activeTab.classList.add("active");
+                        activeTab.style.display = "block"; // Ensure display is block for active tab
+                    }
+
+                    // Update active navigation link styling
+                    navLinks.forEach((link) => {
+                        link.classList.remove("active-nav");
+                        if (link.getAttribute("href") === tabId) {
+                            link.classList.add("active-nav");
+                        }
+                    });
+
+                    // Update mobile menu active link
+                    const mobileNavLinks =
+                        mobileMenu.querySelectorAll(".nav-link");
+                    mobileNavLinks.forEach((link) => {
+                        link.classList.remove("active-nav");
+                        if (link.getAttribute("href") === tabId) {
+                            link.classList.add("active-nav");
+                        }
+                    });
+
+                    // Update URL hash
+                    window.location.hash = tabId;
+
+                    // Close mobile menu after selection
+                    if (!mobileMenu.classList.contains("hidden")) {
+                        mobileMenu.classList.add("hidden");
+                        mobileMenuButton.setAttribute("aria-expanded", "false");
+                    }
+                }
+
+                // Event listeners for navigation links to switch tabs
+                navLinks.forEach((link) => {
+                    link.addEventListener("click", (event) => {
+                        event.preventDefault(); // Prevent default anchor link behavior (scrolling)
+                        const tabId = link.getAttribute("href");
+                        showTab(tabId);
+                    });
+                });
+
+                // Handle initial tab display based on URL hash or default to #overview
+                const initialHash = window.location.hash || "#overview";
+                showTab(initialHash);
+
+                // Listen for hash changes (e.g., browser back/forward buttons)
+                window.addEventListener("hashchange", () => {
+                    showTab(window.location.hash);
+                });
+
+                // Removed IntersectionObserver as tab switching handles active nav link highlighting
+                // const sections = document.querySelectorAll('main section');
+                // const observerOptions = {
+                //     root: null,
+                //     rootMargin: '0px',
+                //     threshold: 0.4
+                // };
+                // const observer = new IntersectionObserver((entries) => {
+                //     entries.forEach(entry => {
+                //         const id = entry.target.getAttribute('id');
+                //         const navLink = document.querySelector(`.nav-link[href="#${id}"]`);
+                //         if (entry.isIntersecting && entry.intersectionRatio >= 0.4) {
+                //             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active-nav'));
+                //             if (navLink) {
+                //                 navLink.classList.add('active-nav');
+                //                 const mobileNavLink = document.querySelector(`#mobile-menu .nav-link[href="#${id}"]`);
+                //                 if (mobileNavLink) {
+                //                      document.querySelectorAll('#mobile-menu .nav-link').forEach(link => link.classList.remove('active-nav'));
+                //                      mobileNavLink.classList.add('active-nav');
+                //                 }
+                //             }
+                //         }
+                //     });
+                // }, observerOptions);
+                // sections.forEach(section => {
+                //     observer.observe(section);
+                // });
+            });
+        </script>
     </body>
 </html>
